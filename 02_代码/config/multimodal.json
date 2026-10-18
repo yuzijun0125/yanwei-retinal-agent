@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "model_revision": "5f6bdd0a068353dc41a896ba3abdd7c0f6d35938",
+  "image_weight": 0.7,
+  "semantic_weight": 0.65,
+  "rrf_k": 20,
+  "cpu_threads": 4,
+  "note": "FLAIR整图研究用召回；中文先映射已识别术语为英文，BM25保留原文；相似度不是疾病概率"
+}

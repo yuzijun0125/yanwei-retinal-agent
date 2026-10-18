@@ -1,0 +1,11 @@
+{
+  "mode": "public-source-without-models-or-original-images",
+  "conflict_action": "ASK_MORE",
+  "resolved_action": "RETURN_CASES",
+  "resolved_eye": "OD",
+  "model_status": {
+    "ready": false,
+    "reason": "当前Python缺少图文模型依赖，请使用独立图文环境启动"
+  },
+  "passed": true
+}

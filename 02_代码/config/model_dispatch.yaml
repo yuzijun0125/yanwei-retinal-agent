@@ -1,0 +1,35 @@
+# ============================================================
+# 眼维 · 模型分派表（文字基线 + FLAIR图文检索）
+# ------------------------------------------------------------
+# 目的：把"哪一步用哪档模型"变成一张可见的表，而不是散落在代码里的隐式选择。
+#       本表记录路由；实际图文开关和融合参数读取 multimodal.json。
+# 现状：图文环境已使用固定权重和离线原图向量；文字基线可独立降级运行。
+#       更换模型还需要适配编码器与重建索引，不能仅修改名称。
+# ============================================================
+
+version: v1.1.0
+
+defaults:
+  fail_mode: degrade      # 模型不可用时：degrade（降级）/ block（阻断）
+
+tasks:
+  image_encode:
+    primary: flair-resnet50
+    fallback: none
+    note: 图文环境使用固定修订的FLAIR整图编码与81张原图向量索引；实际启停和融合参数在multimodal.json，模型未准备时明确降级，不自动下载
+  text_encode:
+    primary: flair-clinicalbert-plus-bm25
+    fallback: bm25-char-ngram
+    note: 已识别的中文医学术语映射为英文供FLAIR编码；原文保留BM25召回，未知描述不假装已翻译
+  query_parse:
+    primary: rule-lexicon
+    fallback: none
+    note: 术语表驱动的规则解析；可替换为 LLM 结构化抽取
+  consistency:
+    primary: deterministic-scorer
+    fallback: none
+    note: 五维一致性为确定性算法，不依赖模型
+  rerank:
+    primary: linear-fusion
+    fallback: bm25-only
+    note: 线性融合；超时则退回纯检索分并标注"未重排"

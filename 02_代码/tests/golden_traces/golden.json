@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "created": "2026-10-15",
+  "note": "回归夹具：任何改动先跑 `python tests/run_golden.py`。跑不过就是改坏了。",
+  "cases": [
+    {
+      "id": "gt-01-return-cases",
+      "text": "眼底病灶区域：微血管瘤；眼别：右眼；位置：黄斑区；程度草案：散在。",
+      "expect_action": "RETURN_CASES",
+      "expect_qc": null,
+      "expect_decided_by": "deterministic",
+      "minimum_candidates": 3,
+      "note": "五维完整且无冲突 → 返回可比先例"
+    },
+    {
+      "id": "gt-02-ask-more",
+      "text": "眼底出血",
+      "expect_action": "ASK_MORE",
+      "expect_qc": null,
+      "expect_decided_by": "deterministic",
+      "note": "缺必备维（位置）→ 追问"
+    },
+    {
+      "id": "gt-03-abstain-hard-conflict",
+      "text": "超广角眼底图像，右眼黄斑区微血管瘤",
+      "expect_action": "ABSTAIN",
+      "expect_qc": null,
+      "expect_decided_by": "hard_override",
+      "expect_overridden": true,
+      "note": "模态不可比（库中全为 CFP）→ 由代码强制改写为拒答"
+    },
+    {
+      "id": "gt-04-suggest-referral",
+      "text": "右眼黄斑区较重硬性渗出",
+      "expect_action": "SUGGEST_REFERRAL",
+      "expect_qc": null,
+      "expect_decided_by": "referral_override",
+      "expect_hit_rule": "REF-001",
+      "note": "程度为「较重」命中转诊规则，覆盖常规阈值映射"
+    }
+  ]
+}

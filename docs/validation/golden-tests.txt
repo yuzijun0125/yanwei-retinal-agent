@@ -1,0 +1,19 @@
+回归夹具 v1.0 ｜ 4 条 ｜ 定义：<repo>\02_代码\tests\golden_traces\golden.json
+------------------------------------------------------------------------
+✓ gt-01-return-cases            五维完整且无冲突 → 返回可比先例
+     · 动作       实际=RETURN_CASES
+     · 判定方式     实际=deterministic
+     · 候选数      实际=5
+✓ gt-02-ask-more                缺必备维（位置）→ 追问
+     · 动作       实际=ASK_MORE
+     · 判定方式     实际=deterministic
+✓ gt-03-abstain-hard-conflict   模态不可比（库中全为 CFP）→ 由代码强制改写为拒答
+     · 动作       实际=ABSTAIN
+     · 判定方式     实际=hard_override
+     · 强制改写标    实际=True
+✓ gt-04-suggest-referral        程度为「较重」命中转诊规则，覆盖常规阈值映射
+     · 动作       实际=SUGGEST_REFERRAL
+     · 判定方式     实际=referral_override
+     · 命中规则     实际=['REF-001']
+------------------------------------------------------------------------
+全部通过 ✓（4/4）

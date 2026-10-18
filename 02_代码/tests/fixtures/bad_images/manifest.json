@@ -1,0 +1,188 @@
+{
+  "source": "内置合成眼底图",
+  "count": 7,
+  "items": [
+    {
+      "file": "ok_clean.png",
+      "defect": "none",
+      "expected_label": "GRADABLE",
+      "actual_label": "GRADABLE",
+      "score": 1.0,
+      "metrics": {
+        "width": 512,
+        "height": 512,
+        "min_side": 512,
+        "mean_gray": 55.25,
+        "contrast_std": 32.15,
+        "laplacian_var": 280.14,
+        "field_ratio": 0.724,
+        "sat_ratio": 0.0,
+        "occlusion_blocks": 0,
+        "border_black_ratio": 1.0
+      },
+      "reasons": [
+        "五项指标均在合理区间"
+      ],
+      "passed": true,
+      "note": "健康图基线（应全项通过）",
+      "bytes": 22872
+    },
+    {
+      "file": "bad_blur.png",
+      "defect": "blur",
+      "expected_label": "DOWNGRADE",
+      "actual_label": "DOWNGRADE",
+      "score": 0.7,
+      "metrics": {
+        "width": 512,
+        "height": 512,
+        "min_side": 512,
+        "mean_gray": 55.01,
+        "contrast_std": 31.72,
+        "laplacian_var": 49.45,
+        "field_ratio": 0.7294,
+        "sat_ratio": 0.0,
+        "occlusion_blocks": 0,
+        "border_black_ratio": 1.0
+      },
+      "reasons": [
+        "清晰度不足：拉普拉斯方差 49.4 < 55.0"
+      ],
+      "passed": true,
+      "note": "清晰度不足（均值模糊）",
+      "bytes": 33216
+    },
+    {
+      "file": "bad_overexposed.png",
+      "defect": "overexposed",
+      "expected_label": "DOWNGRADE",
+      "actual_label": "DOWNGRADE",
+      "score": 0.35,
+      "metrics": {
+        "width": 512,
+        "height": 512,
+        "min_side": 512,
+        "mean_gray": 215.0,
+        "contrast_std": 45.49,
+        "laplacian_var": 443.76,
+        "field_ratio": 1.0,
+        "sat_ratio": 0.2174,
+        "occlusion_blocks": 0,
+        "border_black_ratio": 0.0
+      },
+      "reasons": [
+        "曝光过度：灰度均值 215.0 > 205",
+        "过曝：近饱和像素占比 21.7% ≥ 3%",
+        "视野边界异常：有效视野占比 1.00 > 0.95（疑似非标准眼底图）"
+      ],
+      "passed": true,
+      "note": "曝光过度（三通道接近饱和）",
+      "bytes": 12256
+    },
+    {
+      "file": "bad_dark.png",
+      "defect": "dark",
+      "expected_label": "RETAKE",
+      "actual_label": "RETAKE",
+      "score": 0.0,
+      "metrics": {
+        "width": 512,
+        "height": 512,
+        "min_side": 512,
+        "mean_gray": 9.17,
+        "contrast_std": 5.61,
+        "laplacian_var": 8.59,
+        "field_ratio": 0.0158,
+        "sat_ratio": 0.0,
+        "occlusion_blocks": 35,
+        "border_black_ratio": 1.0
+      },
+      "reasons": [
+        "曝光不足：灰度均值 9.2 < 30",
+        "清晰度不足：拉普拉斯方差 8.6 < 55.0",
+        "对比度过低：灰度标准差 5.6 < 16.0",
+        "局部遮挡：视野内检测到 35 个连续无信号区块（疑似眼睑/睫毛遮挡）",
+        "有效视野过小：占比 0.02 < 0.45（定位/裁剪异常）"
+      ],
+      "passed": true,
+      "note": "曝光严重不足（致命项）",
+      "bytes": 11185
+    },
+    {
+      "file": "bad_tiny.png",
+      "defect": "tiny",
+      "expected_label": "RETAKE",
+      "actual_label": "RETAKE",
+      "score": 0.55,
+      "metrics": {
+        "width": 180,
+        "height": 180,
+        "min_side": 180,
+        "mean_gray": 58.78,
+        "contrast_std": 38.28,
+        "laplacian_var": 464.57,
+        "field_ratio": 0.7244,
+        "sat_ratio": 0.0,
+        "occlusion_blocks": 0,
+        "border_black_ratio": 1.0
+      },
+      "reasons": [
+        "分辨率过低：短边 180 < 300"
+      ],
+      "passed": true,
+      "note": "分辨率过低（致命项）",
+      "bytes": 7362
+    },
+    {
+      "file": "bad_noframe.png",
+      "defect": "noframe",
+      "expected_label": "DOWNGRADE",
+      "actual_label": "DOWNGRADE",
+      "score": 0.65,
+      "metrics": {
+        "width": 512,
+        "height": 512,
+        "min_side": 512,
+        "mean_gray": 71.81,
+        "contrast_std": 13.71,
+        "laplacian_var": 129.38,
+        "field_ratio": 1.0,
+        "sat_ratio": 0.0,
+        "occlusion_blocks": 0,
+        "border_black_ratio": 0.0
+      },
+      "reasons": [
+        "对比度过低：灰度标准差 13.7 < 16.0",
+        "视野边界异常：有效视野占比 1.00 > 0.95（疑似非标准眼底图）"
+      ],
+      "passed": true,
+      "note": "视野边界异常（无黑边）",
+      "bytes": 22738
+    },
+    {
+      "file": "bad_masked.png",
+      "defect": "mask",
+      "expected_label": "DOWNGRADE",
+      "actual_label": "DOWNGRADE",
+      "score": 0.75,
+      "metrics": {
+        "width": 512,
+        "height": 512,
+        "min_side": 512,
+        "mean_gray": 48.93,
+        "contrast_std": 34.04,
+        "laplacian_var": 318.49,
+        "field_ratio": 0.6343,
+        "sat_ratio": 0.0,
+        "occlusion_blocks": 4,
+        "border_black_ratio": 1.0
+      },
+      "reasons": [
+        "局部遮挡：视野内检测到 4 个连续无信号区块（疑似眼睑/睫毛遮挡）"
+      ],
+      "passed": true,
+      "note": "遮挡黑边（眼睑/睫毛）",
+      "bytes": 21205
+    }
+  ]
+}

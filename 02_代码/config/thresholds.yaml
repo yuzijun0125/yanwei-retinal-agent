@@ -1,0 +1,59 @@
+# ============================================================
+# 眼维 · 决策阈值唯一真源（Single Source of Truth）
+# ------------------------------------------------------------
+# 铁律：Skill 剧本、门禁代码、评测脚本、界面提示 —— 一律从这里读。
+#       任何一处硬编码阈值，都是缺陷。
+# 改阈值 = 改这一个文件，并在 CHANGELOG 里记一行。这就是 L2 决策进化的入口。
+# ============================================================
+
+version: v1.1.0
+
+retrieval:
+  topk_coarse: 30        # 粗检索召回上限
+  topk_final: 5          # 最终返回候选数
+  min_candidates: 3      # 候选少于该数 → 触发扩展检索（mode 降级）
+
+# 证据充分性 → 决策动作（唯一映射）
+sufficiency:
+  return_cases: 0.80     # >= 0.80 且无冲突 → RETURN_CASES
+  ask_more: 0.50         # 0.50 ~ 0.80 → ASK_MORE ; < 0.50 → ABSTAIN
+
+# 五维一致性权重（软约束：既参与重排打分，也参与充分性计算）
+weights:
+  eye: 0.20
+  lesion: 0.30
+  location: 0.20
+  severity: 0.15
+  modality: 0.15
+
+# 重排总分 = w_retrieval * 检索分 + w_consistency * 一致性分
+rerank:
+  w_retrieval: 0.55
+  w_consistency: 0.45
+
+# 防跑飞三道保险（缺一道都算缺陷）
+# 三道 = ①步数与轮次上限  ②会话 token 预算  ③每工具超时
+# v1.1 补齐：原只有"追问 ≤2 轮"散落在剧本里，检索扩展与工具重试均无上限。
+guards:
+  max_steps: 12                 # ① 全局最大编排步数，超出强制收尾
+  max_clarify_rounds: 2         # ① 追问轮次上限（ASK_MORE 最多追问几轮）
+  max_retrieval_expansions: 2   # ① 检索扩展次数上限（候选不足时降级重试的封顶）
+  max_tool_retries: 1           # ① 单工具失败重试次数上限
+  token_budget: 24000           # ② 单会话预算（按字符数近似计）
+  timeout_ms:                   # ③ 每工具超时（毫秒）
+    search_cases: 8000
+    extract_medical_entities: 3000
+    verify_medical_logic: 3000
+    build_evidence_chain: 3000
+    record_feedback: 2000
+
+# 高风险 → 建议转诊（命中任一即触发；基层能力不足是前提）
+referral:
+  severity_high: [MARKED, SEVERE]
+  dr_grade_min: 3
+
+# 缓存：key 必须带版本维度，否则换模型/换规则后会命中脏缓存
+cache:
+  enabled: true
+  key_fields: [content_hash, model_ver, rule_ver, threshold_ver]
+model_ver: none-zerotrain-v1

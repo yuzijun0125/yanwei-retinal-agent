@@ -1,0 +1,8 @@
+.......................[yanwei-mcp] tools/call build_evidence_chain -> ok=True action=RETURN_CASES
+[yanwei-mcp] tools/call build_evidence_chain -> ok=True action=RETURN_CASES
+...[yanwei-mcp] tools/call build_evidence_chain -> ok=False action=None
+.........
+----------------------------------------------------------------------
+Ran 35 tests in 0.778s
+
+OK

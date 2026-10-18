@@ -1,0 +1,221 @@
+﻿code,name_cn,name_en,aliases,category,note
+DR,糖尿病视网膜病变,Diabetic Retinopathy,糖网;糖网病;糖尿病性视网膜病变;diabetic retinopathy,disease,主要疾病标签
+NPDR,非增殖型糖尿病视网膜病变,Non-Proliferative Diabetic Retinopathy,非增殖型;非增生型;单纯型;NPDR,disease,DR 分期
+PDR,增殖型糖尿病视网膜病变,Proliferative Diabetic Retinopathy,增殖型;增生型;PDR,disease,DR 晚期
+DME,糖尿病黄斑水肿,Diabetic Macular Edema,黄斑水肿;糖网性黄斑水肿;DME,disease,可与 DR 共存
+CI-DME,中心受累型糖尿病黄斑水肿,Center-Involved DME,中心型黄斑水肿;累及中心,dme_subtype,决定抗VEGF指征
+AMD,年龄相关性黄斑变性,Age-related Macular Degeneration,黄斑变性;年龄相关性黄斑病变;AMD,disease,主要疾病标签
+DRY-AMD,干性年龄相关性黄斑变性,Dry AMD,非渗出性AMD;萎缩型;地图样萎缩,disease,
+WET-AMD,湿性年龄相关性黄斑变性,Wet AMD,新生血管性AMD;渗出性AMD,disease,
+GLAUCOMA,青光眼,Glaucoma,,disease,主要疾病标签
+CATARACT,白内障,Cataract,,disease,主要疾病标签
+HTN-RETINOPATHY,高血压视网膜病变,Hypertensive Retinopathy,高血压性视网膜病变;高网,disease,
+RVO,视网膜静脉阻塞,Retinal Vein Occlusion,静脉阻塞;RVO,disease,
+BRVO,视网膜分支静脉阻塞,Branch Retinal Vein Occlusion,分支静脉阻塞;BRVO,disease,
+CRVO,视网膜中央静脉阻塞,Central Retinal Vein Occlusion,中央静脉阻塞;CRVO,disease,
+RAO,视网膜动脉阻塞,Retinal Artery Occlusion,动脉阻塞;RAO,disease,急症
+MYOPIA-PATH,病理性近视,Pathologic Myopia,高度近视视网膜病变;病理性近视,disease,
+RD,视网膜脱离,Retinal Detachment,网脱;视网膜剥离;RD,disease,急症
+RRD,孔源性视网膜脱离,Rhegmatogenous Retinal Detachment,裂孔性网脱,disease,
+TRD,牵引性视网膜脱离,Tractional Retinal Detachment,牵拉性网脱,disease,
+UVEITIS,葡萄膜炎,Uveitis,,disease,
+RP,视网膜色素变性,Retinitis Pigmentosa,色素变性;RP,disease,
+MACULAR-HOLE,黄斑裂孔,Macular Hole,黄斑孔;MH,disease,
+ERM,黄斑前膜,Epiretinal Membrane,视网膜前膜;黄斑前纤维膜;ERM,disease,
+CSC,中心性浆液性脉络膜视网膜病变,Central Serous Chorioretinopathy,中浆病;CSC,disease,
+MA,微血管瘤,Microaneurysm,微动脉瘤;微血管瘤病;MA,lesion,边界清楚的小红点
+MA-SPOT,微血管瘤样点状,Microaneurysm-like dot,红点;红点灶,lesion,需与点状出血鉴别
+HE,出血,Hemorrhage,视网膜出血;出血灶;HE,lesion,按原文记录位置和程度
+HE-DOT,点状出血,Dot Hemorrhage,点状出血;dot hemorrhage,lesion,
+HE-BLOT,片状出血,Blot Hemorrhage,斑状出血;片状出血,lesion,
+HE-FLAME,火焰状出血,Flame Hemorrhage,火焰状出血;火焰状,lesion,多见于高血压
+HE-PRERETINAL,视网膜前出血,Preretinal Hemorrhage,视网膜前出血;舟状出血,lesion,
+HE-VITREOUS,玻璃体出血,Vitreous Hemorrhage,玻璃体积血;玻璃体出血,lesion,PDR 并发症
+EX,硬性渗出,Hard Exudate,硬渗;硬性渗出物;硬性渗出灶;EX,lesion,不能与玻璃膜疣混用
+EX-RING,环形硬性渗出,Circinate Exudate,环状渗出;环形渗出;环形硬性渗出,lesion,提示黄斑受累
+SE,棉絮斑,Cotton Wool Spot,软性渗出;棉絮状斑;棉絮状渗出;软渗;SE,lesion,按原文记录
+DRUSEN,玻璃膜疣,Drusen,玻璃疣;drusen,lesion,不能与硬性渗出混用
+IRF,视网膜内液,Intraretinal Fluid,层间积液;视网膜内积液;IRF,lesion,需要 OCT 等模态支持
+SRF,视网膜下液,Subretinal Fluid,视网膜下积液;SRF,lesion,需要 OCT 等模态支持
+MACULAR-EDEMA,黄斑水肿,Macular Edema,黄斑区水肿;ME,lesion,需区分是否为 DME
+RETINAL-THICKENING,视网膜增厚,Retinal Thickening,视网膜肿胀;增厚,lesion,
+NVE,视网膜新生血管,New Vessels elsewhere,新生血管;视网膜新生血管,lesion,PDR 标志
+NVD,视盘新生血管,New Vessels on Disc,视盘新生血管;NVD,lesion,PDR 标志
+NVG,虹膜新生血管,Neovascularization of Iris,虹膜红变;NVG,lesion,晚期并发症
+IRMA,视网膜内微血管异常,Intraretinal Microvascular Abnormality,IRMA;视网膜内微血管异常,lesion,重度 NPDR 标志
+VENOUS-BEADING,静脉串珠,Venous Beading,静脉串珠状改变;串珠样静脉,lesion,重度 NPDR 标志
+VENOUS-DILATION,静脉扩张,Venous Dilatation,静脉扩张;静脉增粗,lesion,
+TELANGIECTASIA,毛细血管扩张,Telangiectasia,视网膜毛细血管扩张,lesion,
+LASER-SCAR,激光斑,Laserscar,激光光凝斑;激光瘢痕;光凝斑,lesion,治疗后表现
+SCAR,瘢痕,Scar,视网膜瘢痕;陈旧瘢痕,lesion,
+PIGMENTARY-CHANGE,色素改变,Pigmentary Change,色素沉着;色素紊乱;色素变动,lesion,
+ATROPHY,视网膜萎缩,Retinal Atrophy,萎缩;视网膜萎缩区,lesion,
+PAPILLEDEMA,视盘水肿,Papilledema,视乳头水肿;视盘肿胀,lesion,
+RPE-ABNORMALITY,视网膜色素上皮异常,RPE Abnormality,RPE改变;色素上皮异常,lesion,
+FIBROSIS,纤维化,Fibrosis,视网膜下纤维化;纤维增殖膜,lesion,
+MACULA,黄斑区,Macula,黄斑;黄斑部;黄斑区域,location,眼底后极部核心区域
+FOVEA,黄斑中心凹,Fovea,中心凹;黄斑中心;fovea,location,需要明确原文或医学复核
+PARAFOVEA,旁中心凹,Parafovea,旁中央凹,location,
+PERIFOVEA,中心凹周围,Perifovea,中心凹旁周,location,
+FAZ,中心凹无血管区,Foveal Avascular Zone,黄斑无血管区;FAZ,location,OCTA 评估
+POSTERIOR-POLE,后极部,Posterior Pole,后极;后极部视网膜,location,范围通常大于黄斑区
+DISC,视盘区,Optic Disc,视乳头区;视神经乳头;视盘;视乳头,location,视神经乳头所在区域
+PERIPAPILLARY,视盘周围,Peripapillary,视乳头周围,location,
+TEMPORAL,颞侧,Temporal,颞侧视网膜;颞侧,location,眼别相关
+NASAL,鼻侧,Nasal,鼻侧视网膜;鼻侧,location,眼别相关
+SUPERIOR,上方,Superior,上部;上方视网膜,location,
+INFERIOR,下方,Inferior,下部;下方视网膜,location,
+SUPEROTEMPORAL,颞上,Superotemporal,颞上方,location,
+INFEROTEMPORAL,颞下,Inferotemporal,颞下方,location,
+SUPERONASAL,鼻上,Superonasal,鼻上方,location,
+INFERONASAL,鼻下,Inferonasal,鼻下方,location,
+PERIPHERAL,周边部,Peripheral,周边;周边视网膜,location,
+MIDPERIPHERY,中周部,Midperiphery,中周;赤道部附近,location,
+EQUATOR,赤道部,Equator,赤道,location,
+VASCULAR-ARCADE,血管弓,Vascular Arcade,血管弓内;血管弓区,location,
+MACULA-1DD,黄斑中心1DD内,Within 1DD of Macula,黄斑中心1个视盘直径内;1DD内;中心1DD内,location,DME 分级关键位置
+RETINA,视网膜,Retina,,anatomy,
+CHOROID,脉络膜,Choroid,,anatomy,
+VITREOUS,玻璃体,Vitreous,玻璃体腔,anatomy,
+OPTIC-NERVE,视神经,Optic Nerve,视神经,anatomy,
+RNFL,视网膜神经纤维层,Retinal Nerve Fiber Layer,神经纤维层;RNFL,anatomy,
+RPE,视网膜色素上皮,Retinal Pigment Epithelium,色素上皮;RPE,anatomy,
+BRUCH-MEMBRANE,布鲁赫膜,Bruch Membrane,Bruch膜;玻璃膜,anatomy,
+ILM,内界膜,Internal Limiting Membrane,内界膜;ILM,anatomy,
+NONE,无,None,未见;阴性;无明显;阴性所见,severity,程度为"无"
+FEW,少量,Few,少许;少量;零星;数个,severity,
+SCATTERED,散在,Scattered,散布;散在分布;散在性,severity,
+MODERATE,中度,Moderate,中等;中度,severity,
+MARKED,明显,Marked,显著;明显,severity,
+SEVERE,重度,Severe,严重;重度;严重程度,severity,
+MINIMAL,微量,Minimal,极少量;微量,severity,
+NUMEROUS,大量,Numerous,密集;大量;多发密集,severity,
+LOCALIZED,局限,Localized,局限性;局部,severity,
+DIFFUSE,弥漫,Diffuse,弥散;弥漫性;弥漫分布,severity,
+EXTENSIVE,广泛,Extensive,广泛分布;范围广泛,severity,
+MILD,轻度,Mild,轻微;轻度,severity,
+SINGLE,单发,Single,单个;孤立,severity,
+MULTIPLE,多发,Multiple,多个;多灶,severity,
+CLUSTERED,簇状,Clustered,成簇;簇集;群集,severity,
+CONFLUENT,融合,Confluent,融合成片;相互融合,severity,
+PROGRESSIVE,进展,Progressive,进行性;进展性,severity,
+STABLE,稳定,Stable,平稳;无进展,severity,
+OD,右眼,Oculus Dexter,右眼;右;R;right eye,eye,国际通用缩写
+OS,左眼,Oculus Sinister,左眼;左;L;left eye,eye,国际通用缩写
+OU,双眼,Oculus Uterque,双眼;双;双侧;both eyes,eye,
+CFP,眼底彩色照相,Color Fundus Photography,眼底彩照;彩色眼底照相;彩照;CFP,modality,常用眼底图像
+UWF,超广角眼底图像,Ultra-widefield,超广角;UWF;超广角彩照,modality,覆盖范围更广
+OCT,光学相干断层扫描,Optical Coherence Tomography,相干光断层扫描;OCT,modality,用于视网膜断面
+OCTA,OCT血管成像,OCT Angiography,血流成像;OCTA,modality,
+FFA,荧光素眼底血管造影,Fundus Fluorescein Angiography,眼底荧光造影;荧光造影;FFA,modality,用于血管和渗漏观察
+ICGA,吲哚菁绿血管造影,Indocyanine Green Angiography,ICG;ICGA,modality,
+FAF,眼底自发荧光,Fundus Autofluorescence,自发荧光;FAF,modality,
+RF,无赤光眼底像,Red-free,无赤光;绿光,modality,
+US,眼部超声,B-scan Ultrasonography,B超;眼科B超;超声,modality,
+VF,视野,Visual Field,视野检查;VF,modality,
+DR0,DR 0级 无明显视网膜病变,No Apparent Retinopathy,无明显病变;无DR;0级,dr_grade,ICDR 分级
+DR1,DR 1级 轻度NPDR,Mild NPDR,轻度非增殖型;仅微血管瘤;1级,dr_grade,ICDR 分级
+DR2,DR 2级 中度NPDR,Moderate NPDR,中度非增殖型;2级,dr_grade,ICDR 分级
+DR3,DR 3级 重度NPDR,Severe NPDR,重度非增殖型;3级,dr_grade,ICDR 分级；4-2-1规则
+DR4,DR 4级 PDR,Proliferative DR,增殖型;4级,dr_grade,ICDR 分级
+DME0,DME 0级 无明显硬性渗出,No Apparent Macular Edema,无黄斑水肿;0级,dme_grade,
+DME1,DME 1级 硬性渗出位于黄斑中心1DD之外,Hard Exudates beyond 1DD,非中心型;轻度黄斑水肿;1级,dme_grade,
+DME2,DME 2级 硬性渗出位于黄斑中心1DD之内,Hard Exudates within 1DD,中心型;显著黄斑水肿;2级,dme_grade,
+ROUTINE_1Y,常规随访1年,Routine Follow-up 1 Year,常规随访;1年随访;年度复查,referral,
+TIMELY_3_6M,及时转诊 3-6月,Timely Referral 3-6 Months,及时转诊;3-6月复查;限期转诊,referral,
+IMMEDIATE,立即转诊,Immediate Referral,立即转诊;尽快转诊;紧急转诊,referral,
+EMERGENCY_SAME_DAY,当日急诊转诊,Emergency Same Day,当日转诊;急诊;立即急诊,referral,
+NONE-REFERRAL,无需转诊,No Referral Needed,无需转诊;不需要转诊,referral,
+REFER,转诊,Referral,建议转诊;转到上级;向上级医院转诊,referral,
+FOLLOWUP,随访,Follow-up,复查;随访观察;定期复查,referral,
+SCREENING,筛查,Screening,糖网筛查;眼底筛查,exam,
+GRADING,分级,Grading,严重程度分级;判读分级,exam,
+BCVA,最佳矫正视力,Best Corrected Visual Acuity,矫正视力;最佳矫正视力,exam,
+VA,视力,Visual Acuity,裸眼视力;视力,exam,
+IOP,眼压,Intraocular Pressure,眼压;眼内压,exam,
+HBA1C,糖化血红蛋白,Glycated Hemoglobin,糖化;HbA1c;血糖化,exam,
+DURATION,糖尿病病程,Diabetes Duration,病程;患糖尿病年限,exam,
+BP,血压,Blood Pressure,血压;高血压病史,exam,
+CONFUSION-EX-DRUSEN,硬性渗出≠玻璃膜疣,Hard Exudate vs Drusen,硬渗与玻璃膜疣鉴别,confusion,两者形态相近但意义不同，严禁混用
+CONFUSION-SE-EX,棉絮斑≠硬性渗出,Cotton Wool Spot vs Hard Exudate,软渗与硬渗鉴别,confusion,棉絮斑是缺血表现，硬渗是渗出
+CONFUSION-MA-HE,微血管瘤≠点状出血,Microaneurysm vs Dot Hemorrhage,微血管瘤与点状出血鉴别,confusion,形态相近，需按原文记录
+CONFUSION-UNKNOWN-NEG,未知≠阴性,Unknown vs Negative,待复核与阴性鉴别,confusion,证据强度不同，不可互相填充
+CONFUSION-NPDR-PDR,非增殖≠增殖,NPDR vs PDR,分期鉴别,confusion,决定是否增殖期
+CONFUSION-SRF-IRF,视网膜下液≠视网膜内液,SRF vs IRF,积液层次鉴别,confusion,层次不同治疗策略不同
+SYM-BLURRED,视物模糊,Blurred Vision,视物不清;视力模糊;看东西模糊,symptom,
+SYM-DECREASED-VA,视力下降,Decreased Visual Acuity,视力减退;视力降低;视力差,symptom,
+SYM-FLOATERS,飞蚊症,Floaters,眼前黑影;黑点飘动;浮游物,symptom,
+SYM-PHOTOPSIA,闪光感,Photopsia,闪光;眼前闪光,symptom,
+SYM-VF-DEFECT,视野缺损,Visual Field Defect,视野缺失;视野暗区;视野缩小,symptom,
+SYM-METAMORPHOPSIA,视物变形,Metamorphopsia,变形;看东西变形;视物扭曲,symptom,
+SYM-SCOTOMA,中心暗点,Central Scotoma,暗点;中心黑影,symptom,
+SYM-NIGHT-BLINDNESS,夜盲,Night Blindness,夜视力差;暗适应下降,symptom,
+SYM-COLOR-DEFECT,色觉异常,Color Vision Defect,辨色困难;色觉障碍,symptom,
+SYM-EYE-PAIN,眼痛,Eye Pain,眼胀痛;眼球疼痛,symptom,
+SYM-DIPLOPIA,复视,Diplopia,重影;双影,symptom,
+SYM-AMAUROSIS,一过性黑矇,Amaurosis Fugax,一过性视力丧失;短暂黑矇,symptom,
+RISK-DM,糖尿病,Diabetes Mellitus,糖尿病史;DM;血糖高,risk,主要危险因素
+RISK-HTN,高血压,Hypertension,高血压史;血压高,risk,主要危险因素
+RISK-HLP,高血脂,Hyperlipidemia,血脂异常;高脂血症,risk,
+RISK-SMOKE,吸烟,Smoking,抽烟;吸烟史,risk,
+RISK-PREGNANCY,妊娠,Pregnancy,怀孕;孕期,risk,可加速 DR 进展
+RISK-LONG-DURATION,病程长,Long Duration,糖尿病年限长;病程较长,risk,
+RISK-POOR-GLYCEMIA,血糖控制不佳,Poor Glycemic Control,血糖未达标;血糖波动,risk,
+RISK-NEPHROPATHY,糖尿病肾病,Diabetic Nephropathy,肾病;肾损,risk,
+RISK-OBESITY,肥胖,Obesity,超重,risk,
+RISK-FAMILY-HX,家族史,Family History,遗传史;家族遗传,risk,
+DIS-RETINOSCHISIS,视网膜劈裂,Retinoschisis,,disease,
+DIS-MACULAR-DYSTROPHY,黄斑营养不良,Macular Dystrophy,黄斑变性类疾病,disease,
+DIS-VASCULITIS,视网膜血管炎,Retinal Vasculitis,血管炎,disease,
+DIS-OPTIC-ATROPHY,视神经萎缩,Optic Atrophy,视神经萎缩,disease,
+DIS-ION,缺血性视神经病变,Ischemic Optic Neuropathy,缺血性视神经病;ION,disease,
+DIS-VITREOUS-OPACITY,玻璃体混浊,Vitreous Opacity,玻璃体浑浊;飞蚊,disease,
+DIS-CNV,脉络膜新生血管,Choroidal Neovascularization,CNV;脉络膜新生血管膜,disease,湿性AMD 特征
+DIS-PCV,息肉状脉络膜血管病变,Polypoidal Choroidal Vasculopathy,PCV,disease,
+DIS-RETINAL-ANEURYSM,视网膜大动脉瘤,Retinal Macroaneurysm,大动脉瘤,disease,
+DIS-COATS,Coats 病,Coats Disease,外层渗出性视网膜病变,disease,
+DIS-ROP,早产儿视网膜病变,Retinopathy of Prematurity,ROP,disease,
+DIS-ENDO,眼内炎,Endophthalmitis,眼内感染,disease,急症
+DIS-AMD-DRY,地图样萎缩,Geographic Atrophy,萎缩型AMD,disease,
+LES-SUBRETINAL-HEM,视网膜下出血,Subretinal Hemorrhage,视网膜下积血,lesion,
+LES-RETINAL-FOLD,视网膜皱褶,Retinal Fold,皱褶;视网膜皱襞,lesion,
+LES-EXUDATIVE-RD,渗出性视网膜脱离,Exudative Retinal Detachment,浆液性网脱,lesion,
+LES-SUBRETINAL-FIBROSIS,视网膜下增生,Subretinal Fibrosis,视网膜下纤维增生,lesion,
+LES-RETINAL-EDEMA,视网膜水肿,Retinal Edema,视网膜肿胀,lesion,
+LES-CME,黄斑囊样水肿,Cystoid Macular Edema,囊样水肿;CME,lesion,
+LES-DISC-HYPEREMIA,视盘充血,Optic Disc Hyperemia,视盘充血,lesion,
+LES-DISC-BLUR,视盘边界模糊,Blurred Disc Margin,视盘边界不清,lesion,
+LES-ARTERIAL-NARROWING,动脉变细,Arterial Narrowing,视网膜动脉变细,lesion,
+LES-AV-NICKING,动静脉交叉征,Arteriovenous Nicking,动静脉交叉压迫,lesion,
+LES-ARTERIOSCLEROSIS,动脉硬化,Arteriosclerosis,视网膜动脉硬化,lesion,
+LES-RETINAL-BREAK,视网膜裂孔,Retinal Break,裂孔;视网膜裂孔,lesion,
+LES-LATTICE,格子样变性,Lattice Degeneration,格子样变性区,lesion,
+LES-RPE-ATROPHY,脉络膜视网膜萎缩,Chorioretinal Atrophy,脉络膜视网膜萎缩,lesion,
+LES-CHOROIDAL-FOLD,脉络膜皱褶,Choroidal Folds,脉络膜皱褶,lesion,
+LOC-ORA-SERRATA,锯齿缘,Ora Serrata,锯齿缘部,location,
+LOC-CILIARY,睫状体,Ciliary Body,睫状体,location,
+LOC-IRIS,虹膜,Iris,虹膜,location,
+LOC-ANGLE,房角,Anterior Chamber Angle,房角,location,
+LOC-LENS,晶状体,Lens,晶体;晶状体,location,
+LOC-CORNEA,角膜,Cornea,角膜,location,
+LOC-SUBFOVEAL,中心凹下,Subfoveal,黄斑中心凹下,location,治疗决策关键位置
+LOC-SUBRETINAL,视网膜下,Subretinal,视网膜下,location,
+LOC-INTRARETINAL,视网膜内,Intraretinal,视网膜内,location,
+LOC-PRERETINAL,视网膜前,Preretinal,视网膜前,location,
+LOC-VITREOUS-CAVITY,玻璃体腔,Vitreous Cavity,玻璃体腔,location,
+LOC-SUPRACHOROIDAL,脉络膜上腔,Suprachoroidal,脉络膜上腔,location,
+SEV-NEW,新发,New Onset,新出现;新近发生,severity,
+SEV-CHRONIC,陈旧,Chronic,陈旧性;已久,severity,
+SEV-RECURRENT,复发,Recurrent,再次发生;反复,severity,
+SEV-BILATERAL,双眼对称,Symmetric Bilateral,对称性;双眼对称,severity,
+SEV-UNILATERAL,单侧,Unilateral,单眼;一侧,severity,
+SEV-LINEAR,线状,Linear,条状;线形,severity,
+SEV-STELLATE,星芒状,Stellate,星芒形;放射星芒,severity,
+SEV-RADIATING,放射状,Radiating,放射状分布,severity,
+SEV-GEOGRAPHIC,地图状,Geographic,地图样,severity,
+EXAM-FUNDUS,眼底检查,Fundus Examination,眼底查体;查眼底,exam,
+EXAM-DILATED,散瞳检查,Dilated Fundus Exam,散瞳眼底检查,exam,
+EXAM-CONSULT,会诊,Consultation,院内会诊;专科会诊,exam,
+EXAM-REFERRAL-FORM,转诊单,Referral Form,转诊单据,exam,
+EXAM-INTERVAL,随访间隔,Follow-up Interval,复查间隔;随访周期,exam,
+EXAM-MONITORING,监测,Monitoring,病情监测;跟踪观察,exam,

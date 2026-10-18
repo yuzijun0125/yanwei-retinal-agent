@@ -1,0 +1,108 @@
+# ============================================================
+# 眼维 · 医学规则表（Demo 版）
+# ------------------------------------------------------------
+# 说明：本文件是"规则外置"的载体。真实项目里这张表由医学顾问复核后才生效，
+#       当前内容为 IDRiD 掩膜 + 通用眼科术语推导的**草案**，未经临床复核。
+#       规则变更同样要走版本号，供证据卡溯源。
+# ============================================================
+
+version: 草案-未复核-v0.1
+
+# 五维定义：智体需要对齐的五个维度
+dimensions:
+  - eye
+  - lesion
+  - location
+  - severity
+  - modality
+
+# 中文表面形式 → 标准枚举码（查询扩展与术语归一的词表）
+lexicon:
+  眼别:
+    右眼: OD
+    左眼: OS
+    双眼: OU
+    未知: UNKNOWN
+  病灶:
+    微血管瘤: MA
+    微动脉瘤: MA
+    出血: HE
+    视网膜出血: HE
+    点状出血: HE
+    斑片状出血: HE
+    硬性渗出: EX
+    硬性渗出物: EX
+    脂质渗出: EX
+    棉絮斑: SE
+    棉绒斑: SE
+    软性渗出: SE
+    玻璃膜疣: DRUSEN
+    玻璃疣: DRUSEN
+  位置:
+    黄斑区: MACULA
+    黄斑中心: FOVEA
+    中心凹: FOVEA
+    中央凹: FOVEA
+    黄斑中心凹: FOVEA
+    后极部: POSTERIOR_POLE
+    后极: POSTERIOR_POLE
+    颞侧: TEMPORAL
+    颞上方: TEMPORAL
+    颞下方: TEMPORAL
+    鼻侧: NASAL
+    鼻上方: NASAL
+    鼻下方: NASAL
+    视盘: DISC
+    视乳头: DISC
+    视神经乳头: DISC
+    视神经盘: DISC
+  程度:
+    未见: NONE
+    少量: FEW
+    少许: FEW
+    偶见: FEW
+    散在: SCATTERED
+    中度: MODERATE
+    较重: MARKED
+    明显: MARKED
+    大量: MARKED
+    重度: SEVERE
+    严重: SEVERE
+    密集: SEVERE
+  模态:
+    眼底彩色图像: CFP
+    眼底彩照: CFP
+    彩色眼底: CFP
+    眼底照相: CFP
+    超广角: UWF
+    超广角成像: UWF
+
+# 枚举码 → 人类可读（界面与证据卡使用）
+display:
+  lesion: {MA: 微血管瘤, HE: 出血, EX: 硬性渗出, SE: 棉絮斑, DRUSEN: 玻璃膜疣}
+  location: {MACULA: 黄斑区, FOVEA: 黄斑中心, POSTERIOR_POLE: 后极部, TEMPORAL: 颞侧, NASAL: 鼻侧, DISC: 视盘, UNKNOWN: 未知}
+  severity: {NONE: 未见, FEW: 少量, SCATTERED: 散在, MODERATE: 中度, MARKED: 较重, SEVERE: 重度, UNKNOWN: 未知}
+  eye: {OD: 右眼, OS: 左眼, OU: 双眼, UNKNOWN: 未知}
+  modality: {CFP: 眼底彩色图像, UWF: 超广角眼底图像, OCT: 相干断层扫描}
+
+# 冲突定义：哪些维度不一致算是"硬冲突"（硬冲突 → 强制拒答）
+conflict_policy:
+  hard: [eye, modality]        # 眼别或模态不符 → 不可比，直接冲突
+  soft: [lesion, location, severity]   # 软冲突 → 只扣分，不拒答
+
+# 完整性：查询缺失哪些维度 → 扣充分性分（缺一个扣一道）
+completeness:
+  required: [lesion, location]
+  optional: [eye, severity, modality]
+  penalty_per_missing: 0.12
+
+# 转诊规则（真实项目需替换为指南条款引用，此处为占位）
+referral_rules:
+  - rule_id: REF-001
+    when: severity in [MARKED, SEVERE]
+    action: SUGGEST_REFERRAL
+    guideline_ref: 中国糖尿病视网膜病变防治指南(2024版) §转诊建议 [占位待补]
+  - rule_id: REF-002
+    when: dr_grade >= 3
+    action: SUGGEST_REFERRAL
+    guideline_ref: ICDR 分级 重度非增殖期及以上 [占位待补]
