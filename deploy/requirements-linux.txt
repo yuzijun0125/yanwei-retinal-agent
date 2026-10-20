@@ -1,0 +1,11 @@
+numpy==2.2.6
+Pillow==11.2.1
+transformers==4.51.3
+huggingface-hub==0.30.2
+safetensors==0.5.3
+scikit-learn==1.6.1
+scikit-image==0.25.2
+pandas==2.2.3
+kornia==0.8.0
+PyYAML==6.0.2
+gdown==5.2.0

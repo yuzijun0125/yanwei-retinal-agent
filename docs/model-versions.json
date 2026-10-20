@@ -1,0 +1,10 @@
+{
+  "flair": {
+    "repo": "jusiro2/FLAIR",
+    "revision": "5f6bdd0a068353dc41a896ba3abdd7c0f6d35938"
+  },
+  "clinicalbert": {
+    "repo": "emilyalsentzer/Bio_ClinicalBERT",
+    "revision": "d5892b39a4adaed74b92212a44081509db72f87b"
+  }
+}

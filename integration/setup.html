@@ -1,0 +1,14 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>眼维 · 首次设置</title><style>body{font:16px/1.8 system-ui;margin:40px auto;padding:0 24px;max-width:850px;background:#0e1729;color:#e4ecf8}a{color:#8ccaff}section{padding:22px;background:#17263d;border-radius:12px;margin:18px 0}button,input,select{font:inherit;padding:8px;border-radius:6px}button{cursor:pointer}pre{white-space:pre-wrap}small{color:#a8b8cf}</style>
+<h1>眼维 · 完整本地部署</h1><p>眼维页面 → Nexent 实际编排 → MCP → 图文检索与证据。</p>
+<section><h2>1. 登录与模型</h2><p><a href="/zh" target="_blank">打开同源 Nexent 平台，注册 / 登录并配置语言模型</a></p><small>云端模型需要网络和你自己的密钥；使用本地模型服务时填写其地址。密钥在 Nexent 中配置，不打入分发包。不要直接打开容器内部地址。</small></section>
+<section><h2>2. 初始化眼维</h2><button id="models">读取可用模型</button><select id="model"><option value="">先登录再读取模型</option></select><p>如平台未列出模型，可填写已配置模型的 ID：<input id="modelid" type="number" min="1" placeholder="模型 ID"></p><button id="bootstrap">注册 MCP、绑定工具并发布智能体</button><p>初始化仅管理名称为 yanwei_integrated 的智能体，不修改原有眼维测试版。</p></section>
+<section><h2>3. 使用</h2><a href="/console">进入眼维工作台</a><p>默认使用 Nexent；显式切换到“本地离线演示”时，页面会标记未经过 Nexent。</p><pre id="status">正在检查依赖…</pre></section>
+<script>
+const out=document.querySelector('#status');
+async function api(path,body){const r=await fetch(path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});const data=await r.json();if(!r.ok)throw Error(data.error?.message||'请求失败，请检查登录');return data}
+async function refresh(){out.textContent=JSON.stringify(await api('/api/integration/status'),null,2)}
+document.querySelector('#models').onclick=async()=>{try{const d=await api('/api/integration/models');const list=d.models||[];const select=document.querySelector('#model');select.replaceChildren();for(const m of list){const o=document.createElement('option');o.value=m.model_id||m.id;o.textContent=(m.display_name||m.model_name||m.name||'模型')+'（ID '+o.value+'）';select.append(o)}out.textContent=list.length?'请选择模型后初始化':'未找到已配置语言模型，请在 Nexent 中添加'}catch(e){out.textContent=e.message}};
+document.querySelector('#bootstrap').onclick=async e=>{const id=Number(document.querySelector('#modelid').value||document.querySelector('#model').value);if(!id){out.textContent='请先配置并选择一个语言模型';return}e.target.disabled=true;out.textContent='正在检查 MCP、同步工具、发布眼维；请勿重复提交…';try{const d=await api('/api/integration/bootstrap',{model_id:id});out.textContent='初始化完成，可以进入眼维工作台。\n'+JSON.stringify(d.agent,null,2)}catch(err){out.textContent=err.message}finally{e.target.disabled=false}};
+refresh().catch(e=>out.textContent=e.message);
+</script></html>

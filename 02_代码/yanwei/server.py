@@ -1,4 +1,4 @@
-"""眼维 · 零依赖本地 HTTP 服务。
+﻿"""眼维 · 零依赖本地 HTTP 服务。
 
 对外接口：
   GET  /                    单页主界面（web/index.html）
@@ -198,6 +198,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._serve_file(os.path.join(WEB_DIR, "index.html"))
             if path == "/chat":
                 return self._serve_file(os.path.join(WEB_DIR, "chat.html"))
+            if path in ("/console", "/nexent-console"):
+                return self._serve_file(os.path.join(WEB_DIR, "nexent-console.html"))
             if path == "/api/asset":
                 try:
                     asset = assets.get((qs.get("id") or [""])[0])
@@ -222,6 +224,15 @@ class Handler(BaseHTTPRequestHandler):
                                    "threshold_ver": cfg.threshold_ver, "rule_ver": cfg.rule_ver,
                                    "model_ver": cfg.model_ver, "fingerprint": cfg.fingerprint,
                                    "tools": list(MT.TOOLS)})
+            if path in ('/api/integration/result', '/api/integration/asset-check'):
+                try:
+                    if path.endswith('asset-check'):
+                        asset = assets.get((qs.get('id') or [''])[0])
+                        return self._json({'ok': True, 'asset_id': asset['asset_id']})
+                    from . import integration_results
+                    return self._json(integration_results.read((qs.get('id') or [''])[0]))
+                except ValueError as exc:
+                    return self._json({'error': {'message': str(exc)}}, 404)
             if path == '/api/multimodal':
                 return self._json(multimodal.status())
             if path == '/api/case-image':

@@ -1,0 +1,26 @@
+name: Engineering checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -r requirements-demo.txt
+      - name: Backend contracts
+        working-directory: 02_代码
+        run: python -m unittest discover -s tests -p 'test_*.py'
+      - name: Golden business regressions
+        working-directory: 02_代码
+        run: python tests/run_golden.py
+      - name: Gateway and visitor isolation
+        working-directory: integration
+        run: python -m unittest test_integration test_public test_hosting

@@ -35,7 +35,7 @@ if ROOT not in sys.path:
 from yanwei import imageqc, pnglite  # noqa: E402
 
 DEFAULT_OUT = os.path.join(ROOT, "tests", "fixtures", "bad_images")
-REAL_DIR = os.path.join(os.path.dirname(ROOT), "01_数据集", "图像", "IDRiD", "原始图像")
+REAL_DIR = r"E:\眼底跨模态检索项目\04_数据资产\01_数据集本体\图像\IDRiD\原始图像"
 
 # (文件名, 缺陷, 期望档位, 说明)
 SPECS = [

@@ -40,7 +40,7 @@ def main() -> int:
         def _open():
             time.sleep(0.6)
             try:
-                webbrowser.open(url + '/chat')
+                webbrowser.open(url)
             except Exception:  # noqa: BLE001
                 pass
         threading.Thread(target=_open, daemon=True).start()

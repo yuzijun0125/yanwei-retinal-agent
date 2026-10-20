@@ -19,3 +19,7 @@ IDRiD 来源：Porwal 等，*Indian Diabetic Retinopathy Image Dataset (IDRiD)*�
 ## 工具与平台
 
 Nexent：<https://atomgit.com/ModelEngine/nexent>。项目通过 MCP 接入平台；Nexent 的代码、商标和权利归其相应权利人。Python、Pillow、PyTorch 及其他依赖按各自原有许可使用。
+
+## 2026-10-20集成组件
+
+Nexent v2.6.0的SQL、配置和SDK兼容补丁随deploy分发，原有许可见deploy/NEXENT_LICENSE和NEXENT_NOTICE。固定上游版本见deploy/upstream-version.txt。FLAIR代码及许可见integration/vendor/FLAIR_LICENSES。中文OCR使用Tesseract及简体中文/英文语言包，由Docker安装；Pillow及其余依赖保留各自许可。截图与标注字段不构成临床金标准。

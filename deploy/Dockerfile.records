@@ -1,0 +1,9 @@
+ARG PYTHON_BASE=docker.m.daocloud.io/library/python:3.11-slim
+FROM ${PYTHON_BASE}
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-chi-sim && rm -rf /var/lib/apt/lists/*
+RUN python -m pip install --no-cache-dir --index-url https://mirrors.aliyun.com/pypi/simple Pillow==11.2.1
+COPY 02_代码 /app/02_代码
+COPY integration/record_service.py /app/record_service.py
+ENV PYTHONPATH=/app/02_代码 PYTHONUTF8=1 PYTHONUNBUFFERED=1
+CMD ["python", "record_service.py"]

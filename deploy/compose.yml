@@ -1,0 +1,582 @@
+name: yanwei-local
+services:
+  nexent-elasticsearch:
+    image: ${ELASTICSEARCH_IMAGE}
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      discovery.type: single-node
+      xpack.security.enabled: 'true'
+      xpack.security.http.ssl.enabled: 'false'
+      xpack.security.transport.ssl.enabled: 'false'
+      ES_JAVA_OPTS: ${ES_JAVA_OPTS}
+      node.name: es01
+      bootstrap.memory_lock: 'false'
+      cluster.routing.allocation.disk.watermark.low: ${ES_DISK_WATERMARK_LOW}
+      cluster.routing.allocation.disk.watermark.high: ${ES_DISK_WATERMARK_HIGH}
+      cluster.routing.allocation.disk.watermark.flood_stage: ${ES_DISK_WATERMARK_FLOOD_STAGE}
+    volumes:
+    - nexent_elasticsearch:/usr/share/elasticsearch/data
+    networks:
+    - nexent
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -sf -u elastic:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health
+        | grep -qE '"status":"(green|yellow)"' || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 20
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  nexent-postgresql:
+    image: ${POSTGRESQL_IMAGE}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${NEXENT_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+    - nexent_postgresql_data:/var/lib/postgresql/data
+    - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    security_opt:
+    - seccomp:unconfined
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    networks:
+    - nexent
+  nexent-config:
+    restart: unless-stopped
+    volumes:
+    - nexent_user:/mnt/nexent
+    - ./sql:/opt/nexent/sql:ro
+    - nexent_skills:/mnt/nexent-data/skills
+    - nexent_memory_provider_plugins:/mnt/nexent-data/memory-provider-plugins
+    - nexent_logs:/mnt/nexent-data/logs
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_REGION: ${MINIO_REGION}
+      MINIO_DEFAULT_BUCKET: ${MINIO_DEFAULT_BUCKET}
+      NEXENT_SQL_STARTUP_MODE: migrate
+      NEXENT_SQL_FILES_CHECKSUM: ${NEXENT_SQL_FILES_CHECKSUM:-}
+      skip_proxy: 'true'
+      UMASK: 18
+    user: root
+    depends_on:
+      nexent-elasticsearch:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    networks:
+    - nexent
+    entrypoint:
+    - /opt/nexent/scripts/start-backend.sh
+    - python
+    - backend/config_service.py
+    env_file:
+    - ./.env
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.nexent
+      args:
+        NEXENT_BASE: ${NEXENT_IMAGE}
+    image: yanwei/nexent-integrated:2.6.0
+  nexent-runtime:
+    restart: unless-stopped
+    volumes:
+    - nexent_user:/mnt/nexent
+    - nexent_agent_workspace:/mnt/nexent/workdir
+    - ./sql:/opt/nexent/sql:ro
+    - nexent_skills:/mnt/nexent-data/skills
+    - nexent_memory_provider_plugins:/mnt/nexent-data/memory-provider-plugins
+    - nexent_logs:/mnt/nexent-data/logs
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_REGION: ${MINIO_REGION}
+      MINIO_DEFAULT_BUCKET: ${MINIO_DEFAULT_BUCKET}
+      NEXENT_SQL_STARTUP_MODE: wait
+      NEXENT_SQL_FILES_CHECKSUM: ${NEXENT_SQL_FILES_CHECKSUM:-}
+      skip_proxy: 'true'
+      UMASK: 18
+    user: root
+    depends_on:
+      nexent-elasticsearch:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    networks:
+    - nexent
+    entrypoint:
+    - /opt/nexent/scripts/start-backend.sh
+    - python
+    - backend/runtime_service.py
+    env_file:
+    - ./.env
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.nexent
+      args:
+        NEXENT_BASE: ${NEXENT_IMAGE}
+    image: yanwei/nexent-integrated:2.6.0
+  nexent-mcp:
+    restart: unless-stopped
+    volumes:
+    - nexent_user:/mnt/nexent
+    - nexent_skills:/mnt/nexent-data/skills
+    - nexent_logs:/mnt/nexent-data/logs
+    - ./sql:/opt/nexent/sql:ro
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_REGION: ${MINIO_REGION}
+      MINIO_DEFAULT_BUCKET: ${MINIO_DEFAULT_BUCKET}
+      NEXENT_SQL_STARTUP_MODE: wait
+      NEXENT_SQL_FILES_CHECKSUM: ${NEXENT_SQL_FILES_CHECKSUM:-}
+      skip_proxy: 'true'
+      UMASK: 18
+    user: root
+    depends_on:
+      nexent-elasticsearch:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    networks:
+    - nexent
+    entrypoint:
+    - /opt/nexent/scripts/start-backend.sh
+    - python
+    - backend/mcp_service.py
+    env_file:
+    - ./.env
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.nexent
+      args:
+        NEXENT_BASE: ${NEXENT_IMAGE}
+    image: yanwei/nexent-integrated:2.6.0
+  nexent-northbound:
+    restart: unless-stopped
+    volumes:
+    - nexent_user:/mnt/nexent
+    - ./sql:/opt/nexent/sql:ro
+    - nexent_skills:/mnt/nexent-data/skills
+    - nexent_logs:/mnt/nexent-data/logs
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_REGION: ${MINIO_REGION}
+      MINIO_DEFAULT_BUCKET: ${MINIO_DEFAULT_BUCKET}
+      NEXENT_SQL_STARTUP_MODE: wait
+      NEXENT_SQL_FILES_CHECKSUM: ${NEXENT_SQL_FILES_CHECKSUM:-}
+      skip_proxy: 'true'
+      UMASK: 18
+    user: root
+    depends_on:
+      nexent-elasticsearch:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    networks:
+    - nexent
+    entrypoint:
+    - /opt/nexent/scripts/start-backend.sh
+    - python
+    - backend/northbound_service.py
+    env_file:
+    - ./.env
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.nexent
+      args:
+        NEXENT_BASE: ${NEXENT_IMAGE}
+    image: yanwei/nexent-integrated:2.6.0
+  nexent-web:
+    image: ${NEXENT_WEB_IMAGE}
+    restart: unless-stopped
+    networks:
+    - nexent
+    volumes:
+    - nexent_project_config:/mnt/nexent-data/project-config
+    environment:
+      HTTP_BACKEND: http://nexent-config:5010
+      WS_BACKEND: ws://nexent-runtime:5014
+      RUNTIME_HTTP_BACKEND: http://nexent-runtime:5014
+      MINIO_ENDPOINT: http://nexent-minio:9000
+      PROJECT_CONFIG_DIR: /mnt/nexent-data/project-config
+      MODEL_ENGINE_ENABLED: ${MODEL_ENGINE_ENABLED:-false}
+      API_UPSTREAM_INTERNAL: http://nexent-config:5010
+      RUNTIME_UPSTREAM_INTERNAL: http://nexent-runtime:5014
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    env_file:
+    - ./.env
+  redis:
+    image: ${REDIS_IMAGE}
+    command: redis-server --appendonly yes --appendfsync everysec --save "900 1" --save
+      "300 10" --save "60 10000" --dir /data --maxmemory-policy allkeys-lru
+    volumes:
+    - nexent_redis:/data
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+    - nexent
+    environment: {}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  nexent-minio:
+    image: ${MINIO_IMAGE}
+    command: []
+    environment:
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_REGION: ${MINIO_REGION}
+      MINIO_DEFAULT_BUCKET: ${MINIO_DEFAULT_BUCKET}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+    - nexent_minio_data:/data
+    networks:
+    - nexent
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    entrypoint:
+    - /bin/sh
+    - -c
+    - "minio server /data --address ':9000' --console-address ':9001' &\nMINIO_PID=$$!\n\
+      for attempt in $$(seq 1 30); do\n  if mc alias set myadmin http://localhost:9000\
+      \ $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} >/dev/null 2>&1; then\n    break\n\
+      \  fi\n  if [ $$attempt -eq 30 ]; then\n    echo 'MinIO did not become ready\
+      \ in time.' >&2\n    kill $$MINIO_PID\n    wait $$MINIO_PID || true\n    exit\
+      \ 1\n  fi\n  sleep 2\ndone\nmc admin user add myadmin $${MINIO_ACCESS_KEY} $${MINIO_SECRET_KEY}\n\
+      USER_INFO=\"$$(mc admin user info myadmin $${MINIO_ACCESS_KEY} --json 2>/dev/null\
+      \ || true)\"\ncase \"$$USER_INFO\" in\n  *'\"policyName\":\"readwrite\"'*) ;;\n\
+      \  *) mc admin policy attach myadmin readwrite --user=$${MINIO_ACCESS_KEY} ;;\n\
+      esac\nmc stat myadmin/$${MINIO_DEFAULT_BUCKET} >/dev/null 2>&1 || mc mb myadmin/$${MINIO_DEFAULT_BUCKET}\n\
+      mc anonymous set download myadmin/$${MINIO_DEFAULT_BUCKET}\nILM_RULES=\"$$(mc\
+      \ ilm rule ls myadmin/$${MINIO_DEFAULT_BUCKET} --json 2>/dev/null || true)\"\
+      \ncase \"$$ILM_RULES\" in\n  *'\"Expiration\":{\"Days\":7}'*'\"Filter\":{\"\
+      Prefix\":\"preview/\"}'*) ;;\n  *) mc ilm rule add myadmin/$${MINIO_DEFAULT_BUCKET}\
+      \ --prefix 'preview/' --expire-days 7 ;;\nesac\nwait $$MINIO_PID\n"
+  kong:
+    image: ${SUPABASE_KONG}
+    restart: unless-stopped
+    volumes:
+    - ./kong.yml:/home/kong/temp.yml:ro
+    networks:
+      nexent:
+        aliases:
+        - nexent-supabase-kong
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: 'off'
+      KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+      SUPABASE_ANON_KEY: ${SUPABASE_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
+    entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh
+      kong docker-start'
+    healthcheck:
+      test:
+      - CMD
+      - kong
+      - health
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  auth:
+    image: ${SUPABASE_GOTRUE}
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://localhost:9999/health
+      timeout: 10s
+      interval: 10s
+      retries: 5
+    networks:
+    - nexent
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${API_EXTERNAL_URL}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${SUPABASE_POSTGRES_PASSWORD}@${SUPABASE_POSTGRES_HOST}:${SUPABASE_POSTGRES_PORT}/${SUPABASE_POSTGRES_DB}
+      GOTRUE_SITE_URL: ${SITE_URL}
+      GOTRUE_URI_ALLOW_LIST: ${ADDITIONAL_REDIRECT_URLS:-}
+      GOTRUE_DISABLE_SIGNUP: ${DISABLE_SIGNUP}
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: ${ENABLE_EMAIL_SIGNUP}
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: ${ENABLE_ANONYMOUS_USERS}
+      GOTRUE_MAILER_AUTOCONFIRM: ${ENABLE_EMAIL_AUTOCONFIRM}
+      GOTRUE_MAILER_URLPATHS_INVITE: ${MAILER_URLPATHS_INVITE}
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: ${MAILER_URLPATHS_CONFIRMATION}
+      GOTRUE_MAILER_URLPATHS_RECOVERY: ${MAILER_URLPATHS_RECOVERY}
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: ${MAILER_URLPATHS_EMAIL_CHANGE}
+      GOTRUE_EXTERNAL_PHONE_ENABLED: ${ENABLE_PHONE_SIGNUP}
+      GOTRUE_SMS_AUTOCONFIRM: ${ENABLE_PHONE_AUTOCONFIRM}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    volumes: []
+  db:
+    image: ${SUPABASE_DB}
+    restart: unless-stopped
+    volumes:
+    - ./sql/supabase/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:ro
+    - ./sql/supabase/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:ro
+    - ./sql/supabase/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:ro
+    - ./sql/supabase/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:ro
+    - ./sql/supabase/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
+    - ./sql/supabase/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:ro
+    - supabase_db:/var/lib/postgresql/data
+    - ./sql/supabase/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:ro
+    - supabase_logs:/var/log/postgresql
+    - db-config:/etc/postgresql-custom
+    networks:
+      nexent:
+        aliases:
+        - nexent-supabase-db
+    healthcheck:
+      test:
+      - CMD
+      - pg_isready
+      - -U
+      - postgres
+      - -h
+      - localhost
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: ${SUPABASE_POSTGRES_PORT}
+      POSTGRES_PORT: ${SUPABASE_POSTGRES_PORT}
+      PGPASSWORD: ${SUPABASE_POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${SUPABASE_POSTGRES_PASSWORD}
+      PGDATABASE: ${SUPABASE_POSTGRES_DB}
+      POSTGRES_DB: ${SUPABASE_POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: ${JWT_EXPIRY}
+    command:
+    - postgres
+    - -c
+    - config_file=/etc/postgresql/postgresql.conf
+    - -c
+    - log_min_messages=fatal
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  yanwei-retrieval:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.retrieval
+      args:
+        PYTHON_BASE: ${PYTHON_IMAGE}
+    image: yanwei/retrieval:20261019
+    restart: unless-stopped
+    networks:
+    - nexent
+    environment:
+      PYTHONUTF8: '1'
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+      RECORD_OCR_SERVICE: http://yanwei-record-ocr:8236
+    volumes:
+    - ../01_数据集:/app/01_数据集:ro
+    - ../02_代码/models:/app/02_代码/models:ro
+    - ../04_产物:/app/04_产物
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request;urllib.request.urlopen('http://localhost:8235/api/health',timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  yanwei-gateway:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.gateway
+      args:
+        PYTHON_BASE: ${PYTHON_IMAGE}
+    image: yanwei/gateway:20261019
+    restart: unless-stopped
+    networks:
+    - nexent
+    ports:
+    - 127.0.0.1:${YANWEI_PORT:-18880}:18880
+    environment:
+      NEXENT_UPSTREAM: http://nexent-web:3000
+      RETRIEVAL_UPSTREAM: http://yanwei-retrieval:8235
+      MCP_PUBLIC_URL: http://yanwei-retrieval:8235/mcp
+      NEXENT_NORTHBOUND_UPSTREAM: http://nexent-northbound:5013
+    volumes:
+    - ../04_产物/integration:/app/04_产物/integration
+    depends_on:
+      yanwei-retrieval:
+        condition: service_healthy
+      nexent-web:
+        condition: service_started
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request;urllib.request.urlopen('http://localhost:18880/api/integration/status',timeout=8)
+      interval: 15s
+      timeout: 10s
+      retries: 8
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  yanwei-public:
+    image: yanwei/gateway:20261019
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.gateway
+      args:
+        PYTHON_BASE: ${PYTHON_IMAGE}
+    command: [python, integration/public_gateway.py, --host, 0.0.0.0, --port, "18881"]
+    environment:
+      NEXENT_NORTHBOUND_UPSTREAM: http://nexent-northbound:5013
+      RETRIEVAL_UPSTREAM: http://yanwei-retrieval:8235
+      PUBLIC_HTTPS: ${PUBLIC_HTTPS:-0}
+      RECORD_SERVICE: http://yanwei-record-ocr:8236
+    ports:
+      - ${YANWEI_PUBLIC_BIND:-127.0.0.1}:${YANWEI_PUBLIC_PORT:-18881}:18881
+    volumes:
+      - ../04_产物/integration:/app/04_产物/integration
+    networks: [nexent]
+    restart: unless-stopped
+    depends_on:
+      yanwei-retrieval:
+        condition: service_healthy
+      nexent-northbound:
+        condition: service_started
+      yanwei-record-ocr:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request;urllib.request.urlopen('http://localhost:18881/health',timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+  yanwei-record-ocr:
+    image: yanwei/records:20261020
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.records
+      args:
+        PYTHON_BASE: ${PYTHON_IMAGE}
+    volumes:
+      - ../04_产物:/app/04_产物
+    networks: [nexent]
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 2
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request;urllib.request.urlopen('http://localhost:8236/health',timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+networks:
+  nexent:
+    driver: bridge
+volumes:
+  nexent_elasticsearch: {}
+  nexent_postgresql_data: {}
+  nexent_user: {}
+  nexent_skills: {}
+  nexent_memory_provider_plugins: {}
+  nexent_logs: {}
+  nexent_agent_workspace: {}
+  nexent_project_config: {}
+  nexent_redis: {}
+  nexent_minio_data: {}
+  supabase_db: {}
+  supabase_logs: {}
+  db-config: {}

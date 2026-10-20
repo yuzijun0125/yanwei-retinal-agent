@@ -66,7 +66,7 @@ def main() -> int:
     s, b = get("/api/health")
     h = json.loads(b)
     check("health 返回 200", s == 200)
-    check("工具数为 5", len(h["tools"]) == 5, "实际 %d" % len(h["tools"]))
+    check("工具数为 6", len(h["tools"]) == 6, "实际 %d" % len(h["tools"]))
     check("阈值版本可读", bool(h.get("threshold_ver")), h.get("threshold_ver"))
 
     print("=== 2. GET /api/samples ===")
@@ -96,7 +96,7 @@ def main() -> int:
 
     print("=== 6. POST /mcp（MCP over HTTP）===")
     s, r = post("/mcp", {"jsonrpc": "2.0", "id": 9, "method": "tools/list", "params": {}})
-    check("tools/list 返回 5 个工具", len(r["result"]["tools"]) == 5)
+    check("tools/list 返回 6 个工具", len(r["result"]["tools"]) == 6)
     s, r = post("/mcp", {"jsonrpc": "2.0", "id": 10, "method": "tools/call",
                          "params": {"name": "search_cases",
                                     "arguments": {"query_text": "右眼黄斑区微血管瘤", "topk": 3}}})

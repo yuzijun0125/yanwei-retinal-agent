@@ -1,0 +1,4 @@
+ARG NEXENT_BASE=ccr.ccs.tencentyun.com/nexent-hub/nexent:v2.6.0
+FROM ${NEXENT_BASE}
+COPY deploy/sdk_patch /tmp/yanwei-sdk-patch
+RUN python /tmp/yanwei-sdk-patch/apply_runtime_patch.py

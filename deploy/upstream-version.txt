@@ -1,0 +1,3 @@
+Nexent v2.6.0
+Git commit 23a4859ac7b9097971b00093732c0b8ca2d888a8
+FLAIR code d6652d53389ff49e5f73efaccf4246e9de88d1a3

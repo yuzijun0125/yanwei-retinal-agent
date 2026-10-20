@@ -1058,7 +1058,10 @@ def record_feedback(payload: dict, rt: Runtime | None = None) -> dict:
 
 # ================================================================ 统一入口
 
+from .medical_records import read_tool as read_medical_record
+
 TOOLS = {
+    "read_medical_record": read_medical_record,
     "extract_medical_entities": extract_medical_entities,
     "search_cases": search_cases,
     "verify_medical_logic": verify_medical_logic,
@@ -1072,4 +1075,11 @@ def call_tool(name: str, payload: dict, rt: Runtime | None = None) -> dict:
     fn = TOOLS.get(name)
     if fn is None:
         return _fail("BAD_INPUT", "未知工具：%s" % name, "可用工具：%s" % "、".join(TOOLS))
-    return fn(payload or {}, rt)
+    if payload is not None and not isinstance(payload, dict):
+        return _fail("BAD_INPUT", "工具参数必须是 JSON 对象", "请传入命名参数")
+    args = dict(payload or {})
+    result = fn(args, rt)
+    if name == 'read_medical_record' or (name == 'search_cases' and args.get('complete_flow') is True):
+        from . import integration_results
+        integration_results.save(args.get('request_id'), result)
+    return result

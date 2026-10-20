@@ -1,0 +1,19 @@
+services:
+  yanwei-public:
+    environment:
+      PUBLIC_HTTPS: "1"
+  yanwei-https:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      YANWEI_DOMAIN: ${YANWEI_DOMAIN:?Set YANWEI_DOMAIN to your real domain}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - yanwei_caddy_data:/data
+      - yanwei_caddy_config:/config
+    networks: [nexent]
+    depends_on: [yanwei-public]
+volumes:
+  yanwei_caddy_data: {}
+  yanwei_caddy_config: {}

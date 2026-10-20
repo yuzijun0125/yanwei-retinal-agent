@@ -1,0 +1,11 @@
+.git
+runtime
+**/__pycache__
+**/*.pyc
+deploy/.env
+deploy/本机首次登录信息.txt
+04_产物
+01_数据集
+02_代码/models
+验收证据
+*.zip

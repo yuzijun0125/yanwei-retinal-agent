@@ -1,35 +1,11 @@
-# Nexent 接入
+# Nexent实际接入
 
-已有开发环境通过 Nexent v2.6.0 的智能体调用眼维 MCP 后端，并实际验证过文字多轮、双眼澄清及上传图文检索。本仓库提供后端源码和接入约定，不包含完整 Nexent 平台或某个账号的配置快照。
+最新产品链路为：专属网页→访客网关→Nexent发布版→MCP→真实OCR/检索工具→请求关联结果。完整配置步骤见根目录《团队部署与维护.md》及README。
 
-## 连接方式
+`integration/bootstrap.py`是可复现的六工具注册和智能体发布配置；模型ID由管理员选择，MCP/Agent/发布版本ID在当地环境生成，运行状态不随仓库复制。团队完成授权后，访客无需Nexent登录。
 
-1. 按 Nexent 官方项目说明部署平台：<https://atomgit.com/ModelEngine/nexent>。
-2. 准备眼维后端，启动 `02_代码/run_demo.py`。
-3. 配置可从 Nexent 运行环境访问的 HTTP MCP 地址：`http://<retrieval-host>:<port>/mcp`。
-4. 同步下列 5 个工具，并配置支持工具调用的模型。
+六个工具为extract_medical_entities、search_cases、verify_medical_logic、build_evidence_chain、record_feedback、read_medical_record。用户确认OCR文字前不执行该次检索。真实工具结果与当前request_id关联，不复用旧轮结果冒充完成。
 
-| 工具 | 作用 |
-|---|---|
-| extract_medical_entities | 解析五维实体、否定、不确定和输入内冲突 |
-| search_cases | 召回候选；complete_flow=true 时执行完整确定性链路 |
-| verify_medical_logic | 检查结构化可比性与冲突 |
-| build_evidence_chain | 生成动作和证据 |
-| record_feedback | 幂等保存反馈，尚未构成学习闭环 |
+管理员端默认本机18880，访客18881；管理接口不向访客透传。敏感授权仅在服务端，仓库没有实际模型Key。直接8765/chat属于本地后端调试，不应当作Nexent链路验收。
 
-Docker/WSL 内的 localhost 属于容器/子系统，不能直接当 Windows 后端地址。监听接口、端口和授权应按部署环境配置；公开仓库没有绑定开发机的私有 IP。
-
-## 建议的智能体行为
-
-- 保留用户原始描述、否定与眼别，不擅自把双眼请求改成单眼。
-- 优先通过 `search_cases(query_text=..., complete_flow=true)` 完成一次检索链路。
-- ASK_MORE 时按结果追问，用户选择单眼后保留原病灶和位置；ABSTAIN 时说明证据不足。
-- 图片必须先真实上传到眼维 `/api/upload`，使用返回的 `image_asset_id`。只有上传到 Nexent、不做附件桥接，并不代表后端已读取图片。
-- 候选排名、来源、相似度以工具输出为准；不编造候选，不把相似度解释为诊断概率。
-- 用完整后端地址生成证据链接；前端和工具服务不同源时，不要直接把相对路径放到平台答案中。
-
-## 平台协议与附件
-
-曾在开发版遇到模型把工具协议输出为普通文本、附件未传入工具的问题；现场使用过 SDK 兼容补丁。该补丁与平台版本、模型协议及附件流程相关，未作为通用安装器公开到本仓库。新环境应先核验原生工具调用协议和附件传递，不应假定复制仓库即可恢复开发机现场配置。
-
-自定义眼维前端经 Nexent 驱动的统一入口仍未完成；当前 `/chat` 是直接调用检索后端的本地工作台。
+本机工程验收报告中的Agent #6/发布版2只是原开发环境的记录，不是其他机器应照抄的配置。

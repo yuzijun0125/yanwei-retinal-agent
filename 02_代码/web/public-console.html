@@ -1,0 +1,3058 @@
+<!doctype html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>眼维 · 图文病例检索</title>
+
+  <!-- Tailwind CSS v3 -->
+  <script src="/static/tailwindcss-3.4.17.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { ink: '#08090c', panel: '#101218', mint: '#6ee7b7', ice: '#67e8f9' },
+          fontFamily: { sans: ['Inter', 'PingFang SC', 'Microsoft YaHei', 'system-ui', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --bg: #08090c; --panel: #0e1015; --panel-soft: #14171e;
+      --text: #f2f5f7; --muted: #929aaa; --muted-2: #697181;
+      --line: rgba(255, 255, 255, 0.075); --line-strong: rgba(255, 255, 255, 0.12);
+      --mint: #6ee7b7; --ice: #67e8f9; --sky: #38bdf8; --danger: #fb7185;
+      --sidebar-width: 284px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; overflow: hidden;
+      background: radial-gradient(circle at 12% -8%, rgba(45, 212, 191, 0.10), transparent 30%), radial-gradient(circle at 92% 105%, rgba(56, 189, 248, 0.08), transparent 34%), var(--bg);
+      color: var(--text);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    }
+    button, textarea, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; }
+    ::selection { background: rgba(110, 231, 183, 0.28); color: #fff; }
+    [hidden] { display: none !important; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.11); border: 2px solid transparent; border-radius: 999px; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); background-clip: padding-box; }
+    .app-frame { position: relative; isolation: isolate; }
+    .app-frame::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 48px 48px; mask-image: linear-gradient(to bottom, rgba(0,0,0,.7), transparent 72%);
+    }
+    .sidebar {
+      width: var(--sidebar-width); flex: 0 0 var(--sidebar-width); position: relative; z-index: 30;
+      display: flex; flex-direction: column; border-right: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(15,17,23,.94), rgba(10,12,16,.92));
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      box-shadow: 18px 0 60px rgba(0,0,0,.16);
+    }
+    .brand-mark {
+      width: 43px; height: 43px; border-radius: 15px; padding: 1px;
+      background: linear-gradient(145deg, rgba(110,231,183,.9), rgba(56,189,248,.42) 55%, rgba(255,255,255,.08));
+      box-shadow: 0 10px 30px rgba(45,212,191,.15);
+    }
+    .brand-mark-inner {
+      width: 100%; height: 100%; border-radius: 14px; display: grid; place-items: center;
+      background: linear-gradient(145deg, #111820, #0b0e13); color: var(--mint);
+    }
+    .new-chat-btn {
+      position: relative; overflow: hidden; border: 1px solid rgba(110,231,183,.20);
+      background: linear-gradient(135deg, rgba(110,231,183,.13), rgba(56,189,248,.08));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 26px rgba(0,0,0,.16);
+      transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+    .new-chat-btn::after {
+      content: ""; position: absolute; width: 90px; height: 90px; right: -35px; top: -52px;
+      border-radius: 50%; background: rgba(110,231,183,.16); filter: blur(18px); pointer-events: none;
+    }
+    .new-chat-btn:hover {
+      border-color: rgba(110,231,183,.38);
+      background: linear-gradient(135deg, rgba(110,231,183,.18), rgba(56,189,248,.11));
+      transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 30px rgba(0,0,0,.22);
+    }
+    .new-chat-btn:active { transform: translateY(0); }
+    .conversation-scroll { min-height: 0; }
+    .conversation-item {
+      position: relative; border-radius: 13px; border: 1px solid transparent;
+      transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .conversation-item:hover { background: rgba(255,255,255,.034); border-color: rgba(255,255,255,.045); }
+    .conversation-item.active {
+      background: linear-gradient(120deg, rgba(110,231,183,.105), rgba(56,189,248,.045));
+      border-color: rgba(110,231,183,.145); box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+    }
+    .conversation-item.active::before {
+      content: ""; position: absolute; left: -1px; top: 12px; bottom: 12px; width: 2px; border-radius: 999px;
+      background: linear-gradient(to bottom, var(--mint), var(--sky)); box-shadow: 0 0 12px rgba(110,231,183,.5);
+    }
+    .conversation-select { width: 100%; display: block; text-align: left; padding: 10px 38px 10px 12px; border: 0; background: transparent; color: inherit; border-radius: 12px; }
+    .conversation-delete {
+      position: absolute; top: 8px; right: 7px; width: 28px; height: 28px; display: grid; place-items: center;
+      border: 1px solid transparent; border-radius: 9px; color: var(--muted-2); background: rgba(12,14,19,.78);
+      opacity: 0; transform: translateX(3px); transition: opacity .18s ease, transform .18s ease, color .18s ease, background .18s ease;
+    }
+    .conversation-item:hover .conversation-delete, .conversation-delete:focus-visible { opacity: 1; transform: translateX(0); }
+    .conversation-delete:hover { color: var(--danger); background: rgba(251,113,133,.10); }
+    .conversation-delete:disabled { opacity: 0; pointer-events: none; }
+    .chat-shell { min-width: 0; position: relative; }
+    .chat-header {
+      height: 74px; flex-shrink: 0; border-bottom: 1px solid var(--line);
+      background: linear-gradient(to bottom, rgba(8,9,12,.86), rgba(8,9,12,.62));
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    }
+    .assistant-avatar {
+      width: 34px; height: 34px; flex: 0 0 34px; border-radius: 11px; display: grid; place-items: center;
+      color: #bfffe5; background: linear-gradient(145deg, rgba(110,231,183,.20), rgba(56,189,248,.12));
+      border: 1px solid rgba(110,231,183,.20);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 22px rgba(45,212,191,.08);
+    }
+    .assistant-avatar.large { width: 40px; height: 40px; flex-basis: 40px; border-radius: 13px; }
+    .assistant-avatar.error {
+      color: #fecdd3; border-color: rgba(251,113,133,.24);
+      background: linear-gradient(145deg, rgba(251,113,133,.16), rgba(244,63,94,.08));
+    }
+    .messages-scroll { min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scroll-behavior: smooth; }
+    .messages-inner {
+      width: 100%; max-width: 960px; min-height: 100%; margin: 0 auto; padding: 34px 32px 26px;
+      display: flex; flex-direction: column;
+    }
+    .message-list { display: flex; flex-direction: column; gap: 27px; }
+    .empty-state {
+      flex: 1; min-height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 42px 0 58px; animation: emptyIn .55s cubic-bezier(.2,.75,.25,1) both;
+    }
+    .orb-wrap { position: relative; width: 112px; height: 112px; display: grid; place-items: center; margin-bottom: 24px; }
+    .orb-glow {
+      position: absolute; inset: 8px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(110,231,183,.20), rgba(56,189,248,.08) 48%, transparent 70%); filter: blur(8px);
+    }
+    .orb-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(110,231,183,.12); animation: orbit 14s linear infinite; }
+    .orb-ring::before {
+      content: ""; position: absolute; top: 5px; left: 50%; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--mint); box-shadow: 0 0 14px rgba(110,231,183,.8); transform: translateX(-50%);
+    }
+    .orb-ring.second { inset: 14px; animation-direction: reverse; animation-duration: 10s; border-color: rgba(56,189,248,.10); }
+    .orb-core {
+      position: relative; width: 68px; height: 68px; display: grid; place-items: center; border-radius: 23px;
+      color: #c6ffe9; background: linear-gradient(145deg, #121c20, #0d1117); border: 1px solid rgba(110,231,183,.20);
+      box-shadow: 0 18px 54px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .suggestion-card {
+      position: relative; width: 100%; text-align: left; padding: 14px 15px; border-radius: 15px;
+      border: 1px solid var(--line); background: linear-gradient(145deg, rgba(255,255,255,.042), rgba(255,255,255,.018));
+      color: #d9dee7; transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .suggestion-card:hover {
+      transform: translateY(-2px); border-color: rgba(110,231,183,.24);
+      background: linear-gradient(145deg, rgba(110,231,183,.08), rgba(56,189,248,.025)); box-shadow: 0 16px 32px rgba(0,0,0,.2);
+    }
+    .suggestion-card svg { transition: transform .2s ease; }
+    .suggestion-card:hover svg { transform: translateX(2px); color: var(--mint); }
+    .message-row { display: flex; gap: 12px; align-items: flex-start; animation: messageIn .3s cubic-bezier(.22,.8,.26,1) both; }
+    .message-row.user { justify-content: flex-end; }
+    .message-stack { min-width: 0; max-width: min(76%, 720px); }
+    .message-row.user .message-stack { display: flex; flex-direction: column; align-items: flex-end; }
+    .message-meta {
+      height: 20px; display: flex; align-items: center; gap: 8px; margin: 0 3px 5px;
+      color: var(--muted-2); font-size: 11px; line-height: 1;
+    }
+    .message-row.user .message-meta { justify-content: flex-end; }
+    .message-name { color: #aab2c0; font-weight: 600; font-size: 11.5px; }
+    .message-bubble {
+      position: relative; padding: 13px 17px; border-radius: 18px; font-size: 14.5px; line-height: 1.82;
+      white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+    }
+    .message-row.assistant .message-bubble {
+      color: #e8ebf0; border: 1px solid rgba(255,255,255,.075); border-top-left-radius: 6px;
+      background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.024));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 12px 32px rgba(0,0,0,.12);
+    }
+    .message-row.user .message-bubble {
+      color: #f2fffb; border: 1px solid rgba(110,231,183,.16); border-top-right-radius: 6px;
+      background: linear-gradient(135deg, rgba(13,148,136,.92), rgba(3,105,161,.88));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 12px 30px rgba(8,145,178,.11);
+    }
+    .message-row.error .message-bubble {
+      color: #ffe4e7; border-color: rgba(251,113,133,.18);
+      background: linear-gradient(145deg, rgba(251,113,133,.09), rgba(244,63,94,.035));
+    }
+    .message-bubble.is-typing::after {
+      content: ""; display: inline-block; width: 6px; height: 1.05em; margin-left: 3px; border-radius: 2px;
+      vertical-align: -0.14em; background: linear-gradient(to bottom, var(--mint), var(--ice)); animation: caret .78s steps(1) infinite;
+    }
+    .message-actions { opacity: 0; transition: opacity .16s ease; }
+    .message-row:hover .message-actions, .message-actions:focus-within { opacity: 1; }
+    .icon-action {
+      width: 25px; height: 25px; display: grid; place-items: center; border: 0; border-radius: 7px;
+      background: transparent; color: var(--muted-2); transition: color .16s ease, background .16s ease;
+    }
+    .icon-action:hover { color: #d9dee7; background: rgba(255,255,255,.05); }
+    .typing-bubble { display: flex; align-items: center; gap: 10px; padding: 14px 17px; }
+    .typing-dots { display: flex; align-items: center; gap: 4px; }
+    .typing-dots span { width: 5px; height: 5px; border-radius: 50%; background: #9ba4b4; animation: bounceDot 1.2s ease-in-out infinite; }
+    .typing-dots span:nth-child(2) { animation-delay: .14s; }
+    .typing-dots span:nth-child(3) { animation-delay: .28s; }
+    .typing-label { color: var(--muted); font-size: 12.5px; }
+    .composer-zone {
+      flex-shrink: 0; padding: 16px 28px 20px;
+      background: linear-gradient(to top, rgba(8,9,12,.98) 54%, rgba(8,9,12,.78) 78%, rgba(8,9,12,0));
+    }
+    .composer-inner { width: 100%; max-width: 960px; margin: 0 auto; }
+    .composer-box {
+      border: 1px solid rgba(255,255,255,.095); border-radius: 21px;
+      background: linear-gradient(145deg, rgba(22,25,32,.93), rgba(14,16,22,.94));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 18px 55px rgba(0,0,0,.30);
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .composer-box:focus-within {
+      border-color: rgba(110,231,183,.30);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 0 0 4px rgba(110,231,183,.045), 0 22px 60px rgba(0,0,0,.34);
+    }
+    #promptInput {
+      width: 100%; min-height: 31px; max-height: 176px; padding: 15px 18px 5px; border: 0; outline: 0; resize: none;
+      overflow-y: hidden; background: transparent; color: #eef1f5; font-size: 14.5px; line-height: 1.68; caret-color: var(--mint);
+    }
+    #promptInput::placeholder { color: #626a79; }
+    .composer-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 7px 10px 10px 17px; }
+    .send-button {
+      position: relative; width: 42px; height: 42px; flex: 0 0 42px; display: grid; place-items: center;
+      border: 1px solid rgba(110,231,183,.24); border-radius: 14px; color: #062a22;
+      background: linear-gradient(135deg, #8cf5cb, #5ed7ed);
+      box-shadow: 0 9px 28px rgba(45,212,191,.16), inset 0 1px 0 rgba(255,255,255,.45);
+      transition: transform .18s ease, filter .18s ease, opacity .18s ease, box-shadow .18s ease;
+    }
+    .send-button:not(:disabled):hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 12px 34px rgba(45,212,191,.22), inset 0 1px 0 rgba(255,255,255,.5); }
+    .send-button:not(:disabled):active { transform: translateY(0) scale(.97); }
+    .send-button:disabled { color: #575f6e; background: rgba(255,255,255,.045); border-color: rgba(255,255,255,.06); box-shadow: inset 0 1px 0 rgba(255,255,255,.02); }
+    .send-spinner { width: 17px; height: 17px; border: 2px solid rgba(255,255,255,.14); border-top-color: var(--mint); border-radius: 50%; animation: spin .75s linear infinite; }
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 18px;
+      background: rgba(2,4,7,.70); backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+      opacity: 0; transition: opacity .16s ease;
+    }
+    .modal-backdrop.is-visible { opacity: 1; }
+    .modal-card {
+      width: min(440px, 100%); padding: 24px; border-radius: 24px; border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(145deg, #181b22, #101218);
+      box-shadow: 0 35px 100px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.055);
+      transform: translateY(10px) scale(.975); transition: transform .18s cubic-bezier(.2,.8,.2,1);
+    }
+    .modal-backdrop.is-visible .modal-card { transform: translateY(0) scale(1); }
+    .modal-icon {
+      width: 46px; height: 46px; display: grid; place-items: center; border-radius: 15px;
+      color: #fecdd3; background: rgba(251,113,133,.10); border: 1px solid rgba(251,113,133,.16);
+    }
+    .modal-button {
+      min-width: 82px; padding: 10px 16px; border-radius: 11px; border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.045); color: #dce1e9; font-size: 13.5px; font-weight: 600;
+      transition: background .16s ease, border-color .16s ease, transform .16s ease;
+    }
+    .modal-button:hover { background: rgba(255,255,255,.075); border-color: rgba(255,255,255,.13); }
+    .modal-button.primary { color: #07251f; border-color: rgba(110,231,183,.24); background: linear-gradient(135deg, #8cf5cb, #5ed7ed); }
+    .modal-button.primary:hover { filter: brightness(1.04); }
+    .modal-button.danger { color: #fff1f2; border-color: rgba(251,113,133,.22); background: linear-gradient(135deg, #e11d48, #be123c); }
+    .modal-button.danger:hover { filter: brightness(1.06); }
+    .toast {
+      position: fixed; left: 50%; bottom: 112px; z-index: 90; max-width: min(420px, calc(100vw - 36px));
+      padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(110,231,183,.18);
+      background: rgba(17,24,25,.94); color: #dffdf2; font-size: 12.5px;
+      box-shadow: 0 16px 45px rgba(0,0,0,.36); backdrop-filter: blur(16px);
+      opacity: 0; pointer-events: none; transform: translate(-50%, 8px); transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast.error { border-color: rgba(251,113,133,.22); background: rgba(35,17,22,.96); color: #ffe4e7; }
+    .mobile-backdrop {
+      position: fixed; inset: 0; z-index: 25; background: rgba(0,0,0,.52); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity .2s ease;
+    }
+    .mobile-backdrop.show { opacity: 1; pointer-events: auto; }
+    @keyframes messageIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes emptyIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes orbit { to { transform: rotate(360deg); } }
+    @keyframes caret { 0%, 48% { opacity: 1; } 49%, 100% { opacity: 0; } }
+    @keyframes bounceDot { 0%, 60%, 100% { transform: translateY(0); opacity: .48; } 30% { transform: translateY(-4px); opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-102%); transition: transform .24s cubic-bezier(.2,.8,.2,1); }
+      .sidebar.open { transform: translateX(0); }
+      .messages-inner { padding: 26px 18px 20px; }
+      .message-stack { max-width: 86%; }
+      .composer-zone { padding: 12px 14px 14px; }
+      .chat-header { height: 66px; }
+    }
+    @media (max-width: 620px) {
+      .messages-inner { padding: 24px 14px 18px; }
+      .message-stack { max-width: 90%; }
+      .message-row { gap: 9px; }
+      .assistant-avatar { width: 31px; height: 31px; flex-basis: 31px; border-radius: 10px; }
+      .message-bubble { padding: 12px 14px; font-size: 14px; }
+      .suggestion-card { padding: 13px; }
+      .empty-state { min-height: 430px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+
+    /* ===== Nexent 临床病例决策台增强样式 ===== */
+    .header-action {
+      height: 34px; display: inline-flex; align-items: center; gap: 7px; padding: 0 11px;
+      border-radius: 10px; border: 1px solid rgba(255,255,255,.075); background: rgba(255,255,255,.028);
+      color: rgba(255,255,255,.58); font-size: 10.5px; transition: border-color .16s ease, background .16s ease, color .16s ease;
+    }
+    .header-action:hover { color: #defcf1; border-color: rgba(110,231,183,.2); background: rgba(110,231,183,.06); }
+    .mode-pill {
+      display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px;
+      border-radius: 999px; border: 1px solid rgba(110,231,183,.16); background: rgba(110,231,183,.06);
+      color: #a7f3d0; font-size: 10px; font-weight: 600;
+    }
+    .mode-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: #6ee7b7; box-shadow: 0 0 8px rgba(110,231,183,.65); }
+
+    .decision-panel {
+      width: 344px; flex: 0 0 344px; position: relative; z-index: 22;
+      display: flex; flex-direction: column; overflow: hidden;
+      border-left: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(15,17,23,.94), rgba(9,11,15,.97));
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+    }
+    .decision-top { flex-shrink: 0; padding: 17px 18px 14px; border-bottom: 1px solid var(--line); }
+    .decision-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 17px 16px 24px; }
+    .decision-empty {
+      min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; color: rgba(255,255,255,.28); font-size: 12px; line-height: 1.7;
+    }
+    .decision-empty-icon {
+      width: 52px; height: 52px; display: grid; place-items: center; margin-bottom: 14px; border-radius: 17px;
+      border: 1px solid rgba(110,231,183,.12); background: radial-gradient(circle, rgba(110,231,183,.10), rgba(56,189,248,.03));
+      color: rgba(110,231,183,.55);
+    }
+    .decision-section { margin-bottom: 18px; }
+    .decision-section-title {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-bottom: 9px; color: rgba(255,255,255,.34); font-size: 10px; font-weight: 700;
+      letter-spacing: .13em; text-transform: uppercase;
+    }
+    .decision-card {
+      padding: 14px; border-radius: 15px; border: 1px solid rgba(255,255,255,.075);
+      background: linear-gradient(145deg, rgba(255,255,255,.042), rgba(255,255,255,.018));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    }
+    .action-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 999px;
+      font-size: 10px; font-weight: 700; letter-spacing: .04em; white-space: nowrap;
+    }
+    .action-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .tone-mint { color: #8cf5cb; border: 1px solid rgba(110,231,183,.2); background: rgba(110,231,183,.08); }
+    .tone-amber { color: #fcd68a; border: 1px solid rgba(251,191,36,.2); background: rgba(251,191,36,.08); }
+    .tone-red { color: #fda4af; border: 1px solid rgba(251,113,133,.22); background: rgba(251,113,133,.08); }
+    .tone-violet { color: #c4b5fd; border: 1px solid rgba(167,139,250,.22); background: rgba(167,139,250,.09); }
+    .tone-blue { color: #7dd3fc; border: 1px solid rgba(56,189,248,.22); background: rgba(56,189,248,.08); }
+    .tone-slate { color: #cbd5e1; border: 1px solid rgba(148,163,184,.18); background: rgba(148,163,184,.07); }
+    .action-title { margin: 10px 0 0; color: #f2f5f7; font-size: 15px; font-weight: 650; }
+    .action-reason { margin: 7px 0 0; color: rgba(255,255,255,.48); font-size: 11.5px; line-height: 1.7; }
+    .meta-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; margin-top: 12px; }
+    .meta-box { padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,.027); border: 1px solid rgba(255,255,255,.05); }
+    .meta-box span { display: block; color: rgba(255,255,255,.25); font-size: 9px; }
+    .meta-box strong { display: block; margin-top: 3px; color: rgba(255,255,255,.7); font-size: 11.5px; font-weight: 600; }
+    .profile-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .profile-chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.027); font-size: 10.5px; color: rgba(255,255,255,.6);
+    }
+    .profile-chip b { color: rgba(255,255,255,.28); font-weight: 500; font-size: 9.5px; }
+    .profile-chip.missing { border-style: dashed; color: rgba(252,211,77,.75); border-color: rgba(251,191,36,.18); background: rgba(251,191,36,.045); }
+    .quick-options { display: flex; flex-wrap: wrap; gap: 6px; }
+    .quick-chip {
+      padding: 6px 10px; border-radius: 9px; border: 1px solid rgba(110,231,183,.15);
+      background: rgba(110,231,183,.055); color: #baf7df; font-size: 10.5px; transition: all .16s ease;
+    }
+    .quick-chip:hover { border-color: rgba(110,231,183,.36); background: rgba(110,231,183,.1); transform: translateY(-1px); }
+    .doctor-option {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 9px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.025); color: rgba(255,255,255,.67); font-size: 11px; text-align: left;
+      transition: all .16s ease;
+    }
+    .doctor-option:hover { border-color: rgba(110,231,183,.2); background: rgba(110,231,183,.05); color: #e9fff7; }
+    .doctor-option.danger:hover { border-color: rgba(251,113,133,.22); background: rgba(251,113,133,.06); color: #ffe4e7; }
+    .doctor-option:disabled { opacity: .38; pointer-events: none; }
+    .feedback-note {
+      width: 100%; min-height: 66px; resize: vertical; padding: 9px 10px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.07); outline: 0; background: rgba(0,0,0,.16);
+      color: rgba(255,255,255,.7); font-size: 11px; line-height: 1.6;
+    }
+    .feedback-note:focus { border-color: rgba(110,231,183,.22); }
+    .feedback-record { margin-top: 9px; padding: 8px 10px; border-radius: 9px; background: rgba(110,231,183,.065); color: #a7f3d0; font-size: 10px; line-height: 1.55; }
+    .candidate-mini {
+      display: flex; gap: 9px; align-items: flex-start; padding: 9px; border-radius: 11px;
+      border: 1px solid rgba(255,255,255,.055); background: rgba(255,255,255,.02);
+    }
+    .candidate-mini + .candidate-mini { margin-top: 6px; }
+    .candidate-mini img, .candidate-thumb-fallback {
+      width: 44px; height: 44px; flex: 0 0 44px; object-fit: cover; border-radius: 8px;
+      background: #0a0c10; border: 1px solid rgba(255,255,255,.06);
+    }
+    .candidate-thumb-fallback { display: grid; place-items: center; color: rgba(110,231,183,.45); }
+    .candidate-mini strong { display: block; color: rgba(255,255,255,.68); font-size: 10.5px; line-height: 1.45; }
+    .candidate-mini p { margin: 3px 0 0; color: rgba(255,255,255,.3); font-size: 9.5px; line-height: 1.45; }
+
+    .action-card {
+      margin-top: 12px; padding: 13px 14px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.075); background: rgba(255,255,255,.025);
+    }
+    .action-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .action-card-title { margin: 8px 0 0; color: rgba(255,255,255,.82); font-size: 12.5px; font-weight: 600; line-height: 1.55; }
+    .action-card-text { margin: 6px 0 0; color: rgba(255,255,255,.42); font-size: 11px; line-height: 1.65; }
+    .action-inline-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .action-link {
+      display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 8px;
+      border: 1px solid rgba(56,189,248,.16); background: rgba(56,189,248,.05); color: #a5e9ff; font-size: 10px;
+      text-decoration: none;
+    }
+    .action-link:hover { border-color: rgba(56,189,248,.34); background: rgba(56,189,248,.09); }
+    .candidate-strip { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-top: 10px; }
+    .candidate-strip-card {
+      min-width: 0; overflow: hidden; border-radius: 9px; border: 1px solid rgba(255,255,255,.055);
+      background: rgba(0,0,0,.15);
+    }
+    .candidate-strip-card img { width: 100%; height: 62px; object-fit: cover; display: block; background: #080a0e; }
+    .candidate-strip-card div { padding: 6px 7px; }
+    .candidate-strip-card strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.62); font-size: 9.5px; }
+    .candidate-strip-card span { display: block; margin-top: 2px; color: rgba(255,255,255,.27); font-size: 8.5px; }
+
+    .message-attachment {
+      display: inline-flex; align-items: center; gap: 9px; margin-top: 8px; padding: 7px 9px;
+      border-radius: 10px; border: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.12);
+    }
+    .message-attachment img { width: 46px; height: 46px; object-fit: cover; border-radius: 7px; background: #07090c; }
+    .message-attachment div { min-width: 0; }
+    .message-attachment strong { display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; color: rgba(255,255,255,.7); }
+    .message-attachment span { display: block; margin-top: 2px; font-size: 9px; color: rgba(255,255,255,.3); }
+
+    .composer-attachment { display: flex; align-items: center; gap: 10px; margin: 0 12px; padding: 8px; border-radius: 11px; border: 1px solid rgba(110,231,183,.12); background: rgba(110,231,183,.045); }
+    .composer-attachment img { width: 46px; height: 46px; border-radius: 8px; object-fit: cover; background: #080a0e; }
+    .composer-attachment .file-info { min-width: 0; flex: 1; }
+    .composer-attachment strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.67); font-size: 10.5px; }
+    .composer-attachment span { display: block; margin-top: 2px; color: rgba(255,255,255,.3); font-size: 9.5px; }
+    .composer-tool {
+      width: 30px; height: 30px; display: grid; place-items: center; flex: 0 0 30px;
+      border-radius: 9px; border: 1px solid rgba(255,255,255,.065); background: rgba(255,255,255,.025);
+      color: rgba(255,255,255,.42); transition: all .16s ease;
+    }
+    .composer-tool:hover { color: #c8ffea; border-color: rgba(110,231,183,.2); background: rgba(110,231,183,.06); }
+    .composer-tool.text { width: auto; min-width: 74px; height: 30px; padding: 0 9px; gap: 6px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; font-size: 10px; flex-shrink: 0; }
+
+    .case-card { width: min(760px, 100%); max-height: calc(100vh - 36px); overflow-y: auto; }
+    .settings-card { width: min(560px, 100%); max-height: calc(100vh - 36px); overflow-y: auto; }
+    .case-section { margin-top: 17px; }
+    .case-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; color: rgba(255,255,255,.38); font-size: 10.5px; font-weight: 600; letter-spacing: .08em; }
+    .case-label em { font-style: normal; color: rgba(255,255,255,.2); font-size: 9px; font-weight: 400; letter-spacing: 0; }
+    .choice-wrap { display: flex; flex-wrap: wrap; gap: 7px; }
+    .choice-chip {
+      padding: 7px 11px; border-radius: 9px; border: 1px solid rgba(255,255,255,.075);
+      background: rgba(255,255,255,.025); color: rgba(255,255,255,.52); font-size: 11px; transition: all .16s ease;
+    }
+    .choice-chip:hover { border-color: rgba(110,231,183,.18); color: rgba(255,255,255,.8); }
+    .choice-chip.selected { color: #c9ffec; border-color: rgba(110,231,183,.34); background: rgba(110,231,183,.11); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+    .case-note {
+      width: 100%; min-height: 74px; resize: vertical; margin-top: 8px; padding: 10px 12px;
+      border-radius: 11px; border: 1px solid rgba(255,255,255,.075); outline: 0;
+      background: rgba(0,0,0,.16); color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.65;
+    }
+    .case-note:focus, .settings-input:focus { border-color: rgba(110,231,183,.28); }
+    .case-preview {
+      margin-top: 16px; padding: 12px 13px; border-radius: 12px; border: 1px dashed rgba(110,231,183,.15);
+      background: rgba(110,231,183,.035); color: rgba(255,255,255,.56); font-size: 11.5px; line-height: 1.7;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .settings-field { margin-top: 13px; }
+    .settings-label { display: block; margin-bottom: 6px; color: rgba(255,255,255,.38); font-size: 10.5px; }
+    .settings-input {
+      width: 100%; height: 40px; padding: 0 11px; border-radius: 10px; border: 1px solid rgba(255,255,255,.075);
+      outline: 0; background: rgba(0,0,0,.16); color: rgba(255,255,255,.72); font-size: 12px;
+    }
+    .settings-hint { margin: 7px 0 0; color: rgba(255,255,255,.23); font-size: 9.5px; line-height: 1.55; }
+    .settings-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+    .decision-backdrop { display: none; }
+    @media (max-width: 1200px) {
+      .decision-panel {
+        position: fixed; top: 0; right: 0; bottom: 0; z-index: 45; width: min(360px, 92vw); flex-basis: auto;
+        transform: translateX(102%); transition: transform .24s cubic-bezier(.2,.8,.2,1);
+        box-shadow: -30px 0 80px rgba(0,0,0,.45);
+      }
+      .decision-panel.open { transform: translateX(0); }
+      .decision-backdrop { display: block; position: fixed; inset: 0; z-index: 44; background: rgba(0,0,0,.54); backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+      .decision-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    @media (max-width: 760px) {
+      .settings-row { grid-template-columns: 1fr; }
+      .candidate-strip { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .candidate-strip-card:last-child { display: none; }
+    }
+
+    .composer-toolbar { flex-wrap: wrap; row-gap: 8px; }
+    .composer-toolbar > div:first-child { flex: 1 1 320px; min-width: 0; }
+
+
+  </style>
+</head>
+<body>
+  <div class="app-frame flex h-full overflow-hidden">
+    <div id="mobileBackdrop" class="mobile-backdrop" aria-hidden="true"></div>
+
+    <!-- 左侧对话历史 -->
+    <aside id="sidebar" class="sidebar">
+      <div class="flex items-center gap-3 px-5 pb-4 pt-5">
+        <div class="brand-mark" aria-hidden="true">
+          <div class="brand-mark-inner">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M3.25 12s3.25-5.4 8.75-5.4S20.75 12 20.75 12s-3.25 5.4-8.75 5.4S3.25 12 3.25 12Z" stroke="currentColor" stroke-width="1.35"/>
+              <circle cx="12" cy="12" r="2.55" fill="currentColor" fill-opacity=".9"/>
+              <path d="M17.4 5.8 19 4.2M6.6 5.8 5 4.2" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" opacity=".62"/>
+            </svg>
+          </div>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="m-0 text-[17px] font-semibold tracking-[.02em] text-white">眼维</h1>
+            <span class="rounded-md border border-white/10 bg-white/[.045] px-1.5 py-0.5 text-[9px] font-medium tracking-[.13em] text-white/45">CLINICAL</span>
+          </div>
+          <p class="mt-1 text-[10.5px] tracking-[.15em] text-white/32">RETINAL CASE WORKSPACE</p>
+        </div>
+      </div>
+
+      <div class="px-3.5 pb-5 pt-1">
+        <button id="newChatBtn" type="button" class="new-chat-btn flex w-full items-center gap-3 rounded-[14px] px-3.5 py-3 text-left text-[13.5px] font-medium text-[#d8f9ec]">
+          <span class="grid h-7 w-7 place-items-center rounded-[9px] border border-white/10 bg-white/[.055]">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <span class="flex-1">新建对话</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-white/28" aria-hidden="true"><path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between px-5 pb-2.5">
+        <span class="text-[10.5px] font-semibold uppercase tracking-[.16em] text-white/32">对话历史</span>
+        <span id="conversationCount" class="text-[10.5px] tabular-nums text-white/26">0 条</span>
+      </div>
+      <div id="conversationList" class="conversation-scroll flex-1 space-y-1 overflow-y-auto px-2.5 pb-5" aria-label="对话历史列表"></div>
+      <div class="border-t border-white/[.06] px-5 py-4">
+        <div class="flex items-start gap-2.5">
+          <span class="mt-[5px] h-1.5 w-1.5 flex-none rounded-full bg-[#6ee7b7] shadow-[0_0_9px_rgba(110,231,183,.72)]"></span>
+          <div class="min-w-0">
+            <p class="m-0 text-[11px] font-medium text-white/48">病例对话本地保存</p>
+            <p class="m-0 mt-1 text-[10.5px] leading-4 text-white/26">对话与图片预览仅保存在当前浏览器</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 右侧主对话区 -->
+    <main class="chat-shell flex h-full flex-1 flex-col overflow-hidden">
+            <header class="chat-header flex items-center justify-between px-4 sm:px-6">
+        <div class="flex min-w-0 items-center gap-3">
+          <button id="menuBtn" type="button" class="icon-action mr-1 h-9 w-9 rounded-xl border border-white/[.07] bg-white/[.025] text-white/60 md:hidden" aria-label="打开对话历史">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <div class="assistant-avatar large" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M3.25 12s3.25-5.4 8.75-5.4S20.75 12 20.75 12s-3.25 5.4-8.75 5.4S3.25 12 3.25 12Z" stroke="currentColor" stroke-width="1.35"/>
+              <circle cx="12" cy="12" r="2.55" fill="currentColor" fill-opacity=".9"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h2 class="m-0 truncate text-[14px] font-semibold text-[#f0f3f6]">眼维临床决策智能体</h2>
+              <span class="hidden rounded-full border border-[#6ee7b7]/15 bg-[#6ee7b7]/[.07] px-2 py-0.5 text-[9px] font-medium tracking-[.08em] text-[#8cf5cb]/75 lg:inline-flex">MCP · 6 TOOLS</span>
+            </div>
+            <p class="m-0 mt-1 truncate text-[10.5px] text-white/32">病例对话 · 确定性动作 · 证据复核 · 医生反馈</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button disabled id="modeBadgeBtn" type="button" class="mode-pill cursor-pointer" title="修改智能体连接设置">
+            <span class="dot"></span><span id="modeBadgeText">Nexent ? Agent #4</span>
+          </button>
+          <button hidden id="settingsBtn" type="button" class="header-action hidden sm:inline-flex" title="连接设置">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.3"/><path d="M19.2 13.4a7.8 7.8 0 0 0 0-2.8l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.4-1.4L14 2.8h-4l-.4 2.5a8 8 0 0 0-2.4 1.4l-2.4-1-2 3.4 2 1.5a7.8 7.8 0 0 0 0 2.8l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.4 1.4l.4 2.5h4l.4-2.5a8 8 0 0 0 2.4-1.4l2.4 1 2-3.4-2-1.5Z" stroke="currentColor" stroke-width="1.15" stroke-linejoin="round"/></svg>
+            连接设置
+          </button>
+          <button id="decisionToggleBtn" type="button" class="header-action" title="查看本轮决策">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.25"/><path d="M14 3.8V8h4.2M9 12h6M9 15.5h4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            <span class="hidden lg:inline">决策面板</span>
+          </button>
+        </div>
+      </header>
+      <section id="messagesScroll" class="messages-scroll flex-1" aria-label="对话内容">
+        <div class="messages-inner">
+          <div id="emptyState" class="empty-state">
+            <div class="orb-wrap" aria-hidden="true">
+              <div class="orb-glow"></div><div class="orb-ring"></div><div class="orb-ring second"></div>
+              <div class="orb-core">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                  <path d="M3.25 12s3.25-5.4 8.75-5.4S20.75 12 20.75 12s-3.25 5.4-8.75 5.4S3.25 12 3.25 12Z" stroke="currentColor" stroke-width="1.25"/>
+                  <circle cx="12" cy="12" r="2.65" fill="currentColor" fill-opacity=".9"/>
+                  <path d="M18.2 5.2 19.6 3.8M5.8 5.2 4.4 3.8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".6"/>
+                </svg>
+              </div>
+            </div>
+            <h3 class="m-0 text-center text-[22px] font-semibold tracking-[-.02em] text-[#f2f5f7]">从一例眼底病例开始</h3>
+            <p class="mb-0 mt-3 max-w-[500px] text-center text-[13px] leading-6 text-white/38">按五维录入或用自然语言描述。智能体返回的动作、候选、证据与医生选项会同步显示在右侧决策面板。</p><div class="mt-6 flex flex-wrap items-center justify-center gap-2.5"><button id="emptyCaseBtn" type="button" class="inline-flex items-center gap-2 rounded-xl border border-[#6ee7b7]/18 bg-[#6ee7b7]/[.07] px-4 py-2.5 text-[11.5px] font-medium text-[#c9ffec] transition hover:border-[#6ee7b7]/35 hover:bg-[#6ee7b7]/10"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.25"/><path d="M14 3.8V8h4.2M9 12h6M9 15.5h4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>结构化录入病例</button><button id="emptyImageBtn" type="button" class="inline-flex items-center gap-2 rounded-xl border border-white/[.08] bg-white/[.025] px-4 py-2.5 text-[11.5px] font-medium text-white/55 transition hover:border-sky-300/20 hover:bg-sky-300/[.045] hover:text-sky-100/80"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.4" stroke="currentColor" stroke-width="1.3"/><path d="m5.5 17 4.2-4.3 3 3 2.2-2.2 3.6 3.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15.6" cy="9" r="1.4" fill="currentColor"/></svg>上传眼底图片</button></div>
+            <div class="mt-8 grid w-full max-w-[660px] grid-cols-1 gap-2.5 sm:grid-cols-3">
+              <button type="button" class="suggestion-card" data-suggestion="左眼黄斑区散在微血管瘤">
+                <div class="flex items-start justify-between gap-3"><span class="text-[12.5px] leading-5">左眼黄斑区<br/>散在微血管瘤</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="mt-0.5 flex-none text-white/28" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              </button>
+              <button type="button" class="suggestion-card" data-suggestion="右眼黄斑区散在出血">
+                <div class="flex items-start justify-between gap-3"><span class="text-[12.5px] leading-5">右眼黄斑区<br/>散在出血</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="mt-0.5 flex-none text-white/28" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              </button>
+              <button type="button" class="suggestion-card" data-suggestion="右眼黄斑区较重硬性渗出">
+                <div class="flex items-start justify-between gap-3"><span class="text-[12.5px] leading-5">右眼黄斑区<br/>较重硬性渗出</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" class="mt-0.5 flex-none text-white/28" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              </button>
+            </div>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[10.5px] text-white/24">
+              <span class="inline-flex items-center gap-1.5"><span class="h-1 w-1 rounded-full bg-[#6ee7b7]/55"></span>6 个 MCP 工具</span>
+              <span class="inline-flex items-center gap-1.5"><span class="h-1 w-1 rounded-full bg-[#67e8f9]/50"></span>5 类确定性动作</span>
+              <span class="inline-flex items-center gap-1.5"><span class="h-1 w-1 rounded-full bg-[#38bdf8]/45"></span>医生反馈闭环</span>
+            </div>
+          </div>
+          <div id="messageList" class="message-list" aria-live="polite" aria-atomic="false"></div>
+        </div>
+      </section>
+
+      <div class="composer-zone">
+        <div class="composer-inner">
+                    <form id="composerForm" class="composer-box">
+            <div id="attachmentPreview" class="composer-attachment" hidden>
+              <img id="attachmentThumb" alt="待上传的眼底图片预览" />
+              <div class="file-info">
+                <strong id="attachmentName">眼底图片</strong>
+                <span id="attachmentMeta">等待上传</span>
+              </div>
+              <button id="removeAttachmentBtn" type="button" class="icon-action" aria-label="移除图片">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <label for="promptInput" class="sr-only">输入消息</label>
+            <textarea id="promptInput" rows="1" maxlength="8000" placeholder="描述眼别、病灶与位置，或点击“病例录入”按五维填写" aria-label="输入消息"></textarea>
+            <button type="button" id="recordUploadBtn" title="导入病历截图或扫描图片" class="text-[12px] text-emerald-300 px-3 py-2">导入病历截图</button><input id="recordFileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden /><span id="recordUploadHint" class="text-[11px] text-white/50"></span>
+            <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+            <div class="composer-toolbar">
+              <div class="flex min-w-0 flex-wrap items-center gap-2 text-[10.5px] text-white/26">
+                <button id="caseEntryBtn" type="button" class="composer-tool text" title="结构化录入病例">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.25"/><path d="M14 3.8V8h4.2M9 12h6M9 15.5h4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+                  病例录入
+                </button>
+                <button id="imageBtn" type="button" class="composer-tool" title="上传眼底图片">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.4" stroke="currentColor" stroke-width="1.3"/><path d="m5.5 17 4.2-4.3 3 3 2.2-2.2 3.6 3.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15.6" cy="9" r="1.4" fill="currentColor"/></svg>
+                </button>
+                <span class="hidden sm:inline">Enter 发送</span><span class="hidden text-white/15 sm:inline">·</span>
+                <span class="hidden sm:inline">Shift + Enter 换行</span>
+                <span id="charCount" class="tabular-nums text-white/20 sm:ml-1">0 / 8000</span>
+              </div>
+              <button id="sendBtn" type="submit" class="send-button" disabled aria-label="发送消息">
+                <svg id="sendIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span id="sendSpinner" class="send-spinner" hidden aria-hidden="true"></span>
+              </button>
+            </div>
+          </form>
+          <p class="mb-0 mt-2.5 text-center text-[10px] leading-4 text-white/18">智能体输出仅供参考，医学信息请结合专业意见核验</p>
+        </div>
+      </div>
+    </main>
+
+
+    <!-- 右侧：本轮确定性决策与医生选项 -->
+    <aside id="decisionPanel" class="decision-panel" aria-label="本轮临床决策">
+      <div class="decision-top">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="m-0 text-[13px] font-semibold text-[#eef3f5]">本轮临床决策</h2>
+              <span class="rounded-md border border-white/[.07] bg-white/[.025] px-1.5 py-0.5 text-[8.5px] tracking-[.1em] text-white/30">TOOL VERDICT</span>
+            </div>
+            <p class="mb-0 mt-1.5 text-[10px] text-white/28">动作由后端工具返回，不由前端改写</p>
+          </div>
+          <button id="closeDecisionBtn" type="button" class="icon-action h-8 w-8 rounded-lg border border-white/[.06] bg-white/[.02]" aria-label="关闭决策面板">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="decisionBody" class="decision-scroll">
+        <div id="decisionEmpty" class="decision-empty">
+          <div class="decision-empty-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.25"/><path d="M14 3.8V8h4.2M9 12h6M9 15.5h4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+          </div>
+          提交病例后，这里会显示<br />动作、五维画像、证据与医生复核选项。
+        </div>
+        <div id="decisionContent" hidden></div>
+      </div>
+      <div class="border-t border-white/[.055] px-4 py-3">
+        <p class="m-0 text-[9px] leading-4 text-white/20">候选病例用于研究与人工复核，相似度不是疾病概率，不构成临床诊断。</p>
+      </div>
+    </aside>
+    <div id="decisionBackdrop" class="decision-backdrop" aria-hidden="true"></div>
+  </div>
+
+
+  <!-- 结构化病例录入 -->
+  <div id="caseModal" class="modal-backdrop" hidden>
+    <div class="modal-card case-card" role="dialog" aria-modal="true" aria-labelledby="caseModalTitle">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <div class="modal-icon" style="color:#bfffe5;background:rgba(110,231,183,.08);border-color:rgba(110,231,183,.16)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.25"/><path d="M14 3.8V8h4.2M9 12h6M9 15.5h4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <h3 id="caseModalTitle" class="m-0 text-[16px] font-semibold text-[#f3f5f8]">结构化录入病例</h3>
+            <p class="mb-0 mt-1.5 text-[11px] leading-5 text-white/35">按五维填写，系统会组合成可供智能体解析的病例描述。</p>
+          </div>
+        </div>
+        <button id="closeCaseModalBtn" type="button" class="icon-action h-8 w-8 rounded-lg border border-white/[.06] bg-white/[.02]" aria-label="关闭病例录入">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div class="case-section" data-case-group="eye">
+        <div class="case-label"><span>眼别</span><em>硬冲突维度</em></div>
+        <div class="choice-wrap">
+          <button type="button" class="choice-chip" data-case-field="eye" data-case-value="右眼">右眼</button>
+          <button type="button" class="choice-chip" data-case-field="eye" data-case-value="左眼">左眼</button>
+          <button type="button" class="choice-chip" data-case-field="eye" data-case-value="双眼">双眼</button>
+        </div>
+      </div>
+      <div class="case-section" data-case-group="lesion">
+        <div class="case-label"><span>病灶</span><em>必填维度</em></div>
+        <div class="choice-wrap">
+          <button type="button" class="choice-chip" data-case-field="lesion" data-case-value="微血管瘤">微血管瘤</button>
+          <button type="button" class="choice-chip" data-case-field="lesion" data-case-value="出血">出血</button>
+          <button type="button" class="choice-chip" data-case-field="lesion" data-case-value="硬性渗出">硬性渗出</button>
+          <button type="button" class="choice-chip" data-case-field="lesion" data-case-value="棉絮斑">棉絮斑</button>
+          <button type="button" class="choice-chip" data-case-field="lesion" data-case-value="玻璃膜疣">玻璃膜疣</button>
+        </div>
+      </div>
+      <div class="case-section" data-case-group="location">
+        <div class="case-label"><span>位置</span><em>必填维度</em></div>
+        <div class="choice-wrap">
+          <button type="button" class="choice-chip" data-case-field="location" data-case-value="黄斑区">黄斑区</button>
+          <button type="button" class="choice-chip" data-case-field="location" data-case-value="黄斑中心">黄斑中心</button>
+          <button type="button" class="choice-chip" data-case-field="location" data-case-value="后极部">后极部</button>
+          <button type="button" class="choice-chip" data-case-field="location" data-case-value="颞侧">颞侧</button>
+          <button type="button" class="choice-chip" data-case-field="location" data-case-value="鼻侧">鼻侧</button>
+          <button type="button" class="choice-chip" data-case-field="location" data-case-value="视盘">视盘</button>
+        </div>
+      </div>
+      <div class="case-section" data-case-group="severity">
+        <div class="case-label"><span>程度</span><em>可选，影响转诊规则</em></div>
+        <div class="choice-wrap">
+          <button type="button" class="choice-chip" data-case-field="severity" data-case-value="少量">少量</button>
+          <button type="button" class="choice-chip" data-case-field="severity" data-case-value="散在">散在</button>
+          <button type="button" class="choice-chip" data-case-field="severity" data-case-value="中度">中度</button>
+          <button type="button" class="choice-chip" data-case-field="severity" data-case-value="较重">较重</button>
+          <button type="button" class="choice-chip" data-case-field="severity" data-case-value="重度">重度</button>
+        </div>
+      </div>
+      <div class="case-section" data-case-group="modality">
+        <div class="case-label"><span>模态</span><em>硬冲突维度</em></div>
+        <div class="choice-wrap">
+          <button type="button" class="choice-chip" data-case-field="modality" data-case-value="眼底彩色图像">眼底彩色图像</button>
+          <button type="button" class="choice-chip" data-case-field="modality" data-case-value="超广角">超广角</button>
+        </div>
+      </div>
+      <div class="case-section">
+        <div class="case-label"><span>补充描述</span><em>可输入否定、不确定或病史信息</em></div>
+        <textarea id="caseNoteInput" class="case-note" maxlength="2000" placeholder="例如：未见明显出血；疑似黄斑水肿；患者糖尿病史 8 年……"></textarea>
+      </div>
+      <div id="casePreview" class="case-preview">请选择眼别、病灶与位置，或直接输入补充描述。</div>
+      <div class="mt-5 flex flex-wrap items-center justify-between gap-2.5">
+        <button id="clearCaseBtn" type="button" class="modal-button !min-w-0 !px-3 text-[11px]">清空</button>
+        <div class="flex gap-2.5">
+          <button id="fillCaseBtn" type="button" class="modal-button">填入输入框</button>
+          <button id="submitCaseBtn" type="button" class="modal-button primary">提交病例</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nexent / 本地后端连接配置 -->
+  <div id="settingsModal" class="modal-backdrop" hidden>
+    <div class="modal-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <div class="modal-icon" style="color:#a5e9ff;background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.16)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.3"/><path d="M19.2 13.4a7.8 7.8 0 0 0 0-2.8l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.4-1.4L14 2.8h-4l-.4 2.5a8 8 0 0 0-2.4 1.4l-2.4-1-2 3.4 2 1.5a7.8 7.8 0 0 0 0 2.8l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.4 1.4l.4 2.5h4l.4-2.5a8 8 0 0 0 2.4-1.4l2.4 1 2-3.4-2-1.5Z" stroke="currentColor" stroke-width="1.15" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <h3 id="settingsModalTitle" class="m-0 text-[16px] font-semibold text-[#f3f5f8]">智能体连接设置</h3>
+            <p class="mb-0 mt-1.5 text-[11px] leading-5 text-white/35">连接由部署网关统一管理；首次使用请打开页面右下角“首次设置”。</p>
+          </div>
+        </div>
+        <button id="closeSettingsBtn" type="button" class="icon-action h-8 w-8 rounded-lg border border-white/[.06] bg-white/[.02]" aria-label="关闭连接设置">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <form id="settingsForm">
+        <div class="settings-field">
+          <label class="settings-label" for="cfgMode">接口模式</label>
+          <select id="cfgMode" class="settings-input">
+            <option value="nexent">Nexent 智能体（/api/agent/run SSE）</option>
+            <option value="local">本地离线演示（不经过 Nexent）</option>
+          </select>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="cfgNexentBase">Nexent 地址</label>
+          <input id="cfgNexentBase" class="settings-input" type="url" placeholder="当前入口（自动转发 Nexent）" readonly />
+          <p class="settings-hint">连接到 Nexent 的 /api/agent/run。若本页面与 Nexent 同源部署，可留空使用相对路径。</p>
+        </div>
+        <div class="settings-row">
+          <div class="settings-field">
+            <label class="settings-label" for="cfgAgentId">Agent ID</label>
+            <input id="cfgAgentId" class="settings-input" type="number" min="1" step="1" placeholder="首次设置后自动读取" readonly />
+          </div>
+          <div class="settings-field">
+            <label class="settings-label" for="cfgVersionNo">版本号（可选）</label>
+            <input id="cfgVersionNo" class="settings-input" type="number" min="1" step="1" placeholder="首次设置后自动读取" readonly />
+          </div>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="cfgLocalBase">本地眼维后端地址</label>
+          <input id="cfgLocalBase" class="settings-input" type="url" placeholder="当前入口（自动转发检索服务）" readonly />
+          <p class="settings-hint">用于本地结构化检索、图片上传、证据卡与 record_feedback 医生反馈接口。</p>
+        </div>
+        <div class="mt-6 flex justify-end gap-2.5">
+          <button id="cancelSettingsBtn" type="button" class="modal-button">取消</button>
+          <button type="submit" class="modal-button primary">保存配置</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal" class="modal-backdrop" hidden>
+    <div id="modalCard" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalMessage">
+      <div class="flex items-start gap-4">
+        <div id="modalIcon" class="modal-icon"></div>
+        <div class="min-w-0 flex-1 pt-0.5">
+          <h3 id="modalTitle" class="m-0 text-[16px] font-semibold text-[#f3f5f8]">提示</h3>
+          <p id="modalMessage" class="mb-0 mt-2 whitespace-pre-wrap break-words text-[12.5px] leading-[1.75] text-white/48"></p>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-2.5">
+        <button id="modalCancel" type="button" class="modal-button">取消</button>
+        <button id="modalConfirm" type="button" class="modal-button primary">知道了</button>
+      </div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+(() => {
+  'use strict';
+
+  // ???? file:// ?????????????????? Cookie ? CORS ???????
+  if (location.protocol === 'file:') {
+    document.body.textContent='请先运行完整解压目录中的 START.cmd，再访问启动脚本打开的工作台；不要直接双击 HTML 文件。'; return;
+  }
+
+  /* =========================================================
+     连接配置
+     - Nexent v2.6.0：POST /api/agent/run（SSE）
+     - 本地眼维后端：POST /api/chat（JSON，返回 result）
+     两个地址均可在页面右上角“连接设置”中修改。
+     ========================================================= */
+  // 【替换为你的后端API地址】
+  const SAME_ORIGIN_LOCAL = (location.protocol === 'http:' || location.protocol === 'https:') &&
+    (['8765', '8000', '8235'].includes(location.port) ||
+     location.pathname === '/console' || location.pathname === '/nexent-console' ||
+     location.pathname.includes('/static/nexent-console'));
+  const DEFAULT_CONFIG = {
+    mode: 'nexent',
+    nexentBase: '',
+    agentId: '',
+    versionNo: '',
+    localBase: ''
+  };
+
+  const CONFIG_KEY = 'yanwei.hosted.config.v1';
+  const STORAGE_KEY = 'yanwei.hosted.conversations.v1';
+  const LEGACY_KEY = 'yanwei.agent.chat.v1';
+  window.addEventListener('DOMContentLoaded', async()=>{
+    try{const r=await fetch('/api/integration/status');const d=await r.json();
+      if(d.agent?.agent_id){appConfig.agentId=String(d.agent.agent_id);appConfig.versionNo=String(d.agent.version_no);appConfig.nexentBase='';appConfig.localBase='';saveConfig();appConfig.mode = 'nexent'; renderModeBadge();}
+    }catch(_){/* status link remains available; never silently switch to local */}
+  });
+  const MAX_CONVERSATIONS = 50;
+  const REQUEST_TIMEOUT = 180000;
+
+  const ACTION_META = {
+    RETURN_CASES: {
+      label: '返回可比先例', tone: 'mint',
+      summary: '证据充分，展示研究用候选病例，仍需医生复核。',
+      next: '核对候选与证据卡，记录医生复核结论。'
+    },
+    ASK_MORE: {
+      label: '需要补充信息', tone: 'amber',
+      summary: '当前证据不足，智能体应继续追问关键维度。',
+      next: '补充缺失的眼别、病灶、位置或模态信息。'
+    },
+    ABSTAIN: {
+      label: '证据不足 / 拒答', tone: 'red',
+      summary: '本轮不输出可比先例，避免在证据不足时强行结论。',
+      next: '补充信息、更换图像，或结束本轮。'
+    },
+    SUGGEST_REFERRAL: {
+      label: '建议转诊', tone: 'violet',
+      summary: '命中高风险转诊规则，建议医生进一步核查或转诊。',
+      next: '生成转诊摘要并记录医生复核意见。'
+    },
+    RETAKE_IMAGE: {
+      label: '建议重拍', tone: 'blue',
+      summary: '图像质检未通过，本轮不进入检索。',
+      next: '重新上传清晰、合规的眼底图像。'
+    },
+    UNKNOWN: {
+      label: '动作待确认', tone: 'slate',
+      summary: '已收到回复，但未从 SSE 事件中解析到确定性动作。',
+      next: '请以智能体最终回复为准，并检查 MCP 工具是否被调用。'
+    }
+  };
+
+  const DIM_META = {
+    eye: { label: '眼别', order: 1 },
+    lesion: { label: '病灶', order: 2 },
+    location: { label: '位置', order: 3 },
+    severity: { label: '程度', order: 4 },
+    modality: { label: '模态', order: 5 }
+  };
+
+  const CODE_LABELS = {
+    eye: { OD: '右眼', OS: '左眼', OU: '双眼', UNKNOWN: '未知' },
+    lesion: { MA: '微血管瘤', HE: '出血', EX: '硬性渗出', SE: '棉絮斑', DRUSEN: '玻璃膜疣' },
+    location: {
+      MACULA: '黄斑区', FOVEA: '黄斑中心', POSTERIOR_POLE: '后极部', TEMPORAL: '颞侧',
+      NASAL: '鼻侧', DISC: '视盘', UNKNOWN: '未知'
+    },
+    severity: { NONE: '未见', FEW: '少量', SCATTERED: '散在', MODERATE: '中度', MARKED: '较重', SEVERE: '重度', UNKNOWN: '未知' },
+    modality: { CFP: '眼底彩色图像', UWF: '超广角眼底图像', OCT: '相干断层扫描' }
+  };
+
+  const TEXT_CODES = {
+    eye: [['右眼', 'OD'], ['左眼', 'OS'], ['双眼', 'OU']],
+    lesion: [['微血管瘤', 'MA'], ['微动脉瘤', 'MA'], ['出血', 'HE'], ['硬性渗出', 'EX'], ['棉絮斑', 'SE'], ['棉绒斑', 'SE'], ['玻璃膜疣', 'DRUSEN'], ['玻璃疣', 'DRUSEN']],
+    location: [['黄斑中心', 'FOVEA'], ['中心凹', 'FOVEA'], ['中央凹', 'FOVEA'], ['黄斑区', 'MACULA'], ['后极部', 'POSTERIOR_POLE'], ['后极', 'POSTERIOR_POLE'], ['颞侧', 'TEMPORAL'], ['鼻侧', 'NASAL'], ['视盘', 'DISC'], ['视乳头', 'DISC']],
+    severity: [['散在', 'SCATTERED'], ['较重', 'MARKED'], ['明显', 'MARKED'], ['大量', 'MARKED'], ['重度', 'SEVERE'], ['严重', 'SEVERE'], ['中度', 'MODERATE'], ['少量', 'FEW'], ['少许', 'FEW']],
+    modality: [['超广角', 'UWF'], ['眼底彩色图像', 'CFP'], ['眼底彩照', 'CFP'], ['彩色眼底', 'CFP']]
+  };
+
+  const QUICK_OPTIONS = {
+    eye: [
+      { label: '右眼', prompt: '右眼' },
+      { label: '左眼', prompt: '左眼' },
+      { label: '双眼', prompt: '双眼' }
+    ],
+    lesion: [
+      { label: '微血管瘤', prompt: '微血管瘤' },
+      { label: '出血', prompt: '出血' },
+      { label: '硬性渗出', prompt: '硬性渗出' },
+      { label: '棉絮斑', prompt: '棉絮斑' },
+      { label: '玻璃膜疣', prompt: '玻璃膜疣' }
+    ],
+    location: [
+      { label: '黄斑区', prompt: '黄斑区' },
+      { label: '黄斑中心', prompt: '黄斑中心' },
+      { label: '后极部', prompt: '后极部' },
+      { label: '颞侧', prompt: '颞侧' },
+      { label: '鼻侧', prompt: '鼻侧' },
+      { label: '视盘', prompt: '视盘' }
+    ],
+    severity: [
+      { label: '少量', prompt: '少量' },
+      { label: '散在', prompt: '散在' },
+      { label: '中度', prompt: '中度' },
+      { label: '较重', prompt: '较重' },
+      { label: '重度', prompt: '重度' }
+    ],
+    modality: [
+      { label: '眼底彩色图像', prompt: '眼底彩色图像' },
+      { label: '超广角', prompt: '超广角眼底图像' }
+    ]
+  };
+
+  const ICONS = {
+    eye: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.25 12s3.25-5.4 8.75-5.4S20.75 12 20.75 12s-3.25 5.4-8.75 5.4S3.25 12 3.25 12Z" stroke="currentColor" stroke-width="1.35"/><circle cx="12" cy="12" r="2.55" fill="currentColor" fill-opacity=".9"/></svg>',
+    copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2.3" stroke="currentColor" stroke-width="1.4"/><path d="M16 8V6.2A2.2 2.2 0 0 0 13.8 4H6.2A2.2 2.2 0 0 0 4 6.2v7.6A2.2 2.2 0 0 0 6.2 16H8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7h15M9 7V4.8h6V7m-8.5 0 .8 11.1A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.9L17.5 7M10 10.5v5.5m4-5.5v5.5" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    alert: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.5v5M12 17h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10.3 3.8 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.8a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"/></svg>',
+    delete: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7h15M9 7V4.8h6V7m-8.5 0 .8 11.1A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.9L17.5 7M10 10.5v5.5m4-5.5v5.5" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    external: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 5h5v5m0-5-8 8M18 13v5.2A1.8 1.8 0 0 1 16.2 20H5.8A1.8 1.8 0 0 1 4 18.2V7.8A1.8 1.8 0 0 1 5.8 6H11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    image: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.4" stroke="currentColor" stroke-width="1.3"/><path d="m5.5 17 4.2-4.3 3 3 2.2-2.2 3.6 3.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15.6" cy="9" r="1.4" fill="currentColor"/></svg>',
+    doc: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.25"/><path d="M14 3.8V8h4.2M9 12h6M9 15.5h4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>',
+    feedback: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.6 8.6 0 0 1-3.2-.6L4 20l1.5-4A7.2 7.2 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5Z" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/><path d="M8.5 11.5h7M8.5 14.5h4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    chevron: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
+  const els = {
+    sidebar: document.getElementById('sidebar'),
+    mobileBackdrop: document.getElementById('mobileBackdrop'),
+    menuBtn: document.getElementById('menuBtn'),
+    newChatBtn: document.getElementById('newChatBtn'),
+    conversationList: document.getElementById('conversationList'),
+    conversationCount: document.getElementById('conversationCount'),
+    messagesScroll: document.getElementById('messagesScroll'),
+    messageList: document.getElementById('messageList'),
+    emptyState: document.getElementById('emptyState'),
+    promptInput: document.getElementById('promptInput'),
+    charCount: document.getElementById('charCount'),
+    composerForm: document.getElementById('composerForm'),
+    sendBtn: document.getElementById('sendBtn'),
+    sendIcon: document.getElementById('sendIcon'),
+    sendSpinner: document.getElementById('sendSpinner'),
+    settingsBtn: document.getElementById('settingsBtn'),
+    decisionToggleBtn: document.getElementById('decisionToggleBtn'),
+    closeDecisionBtn: document.getElementById('closeDecisionBtn'),
+    decisionPanel: document.getElementById('decisionPanel'),
+    decisionBackdrop: document.getElementById('decisionBackdrop'),
+    decisionEmpty: document.getElementById('decisionEmpty'),
+    decisionContent: document.getElementById('decisionContent'),
+    modeBadgeBtn: document.getElementById('modeBadgeBtn'),
+    modeBadgeText: document.getElementById('modeBadgeText'),
+    caseEntryBtn: document.getElementById('caseEntryBtn'),
+    emptyCaseBtn: document.getElementById('emptyCaseBtn'),
+    emptyImageBtn: document.getElementById('emptyImageBtn'),
+    imageBtn: document.getElementById('imageBtn'),
+    imageInput: document.getElementById('imageInput'),
+    attachmentPreview: document.getElementById('attachmentPreview'),
+    attachmentThumb: document.getElementById('attachmentThumb'),
+    attachmentName: document.getElementById('attachmentName'),
+    attachmentMeta: document.getElementById('attachmentMeta'),
+    removeAttachmentBtn: document.getElementById('removeAttachmentBtn'),
+    caseModal: document.getElementById('caseModal'),
+    closeCaseModalBtn: document.getElementById('closeCaseModalBtn'),
+    caseNoteInput: document.getElementById('caseNoteInput'),
+    casePreview: document.getElementById('casePreview'),
+    clearCaseBtn: document.getElementById('clearCaseBtn'),
+    fillCaseBtn: document.getElementById('fillCaseBtn'),
+    submitCaseBtn: document.getElementById('submitCaseBtn'),
+    settingsModal: document.getElementById('settingsModal'),
+    closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+    cancelSettingsBtn: document.getElementById('cancelSettingsBtn'),
+    settingsForm: document.getElementById('settingsForm'),
+    cfgMode: document.getElementById('cfgMode'),
+    cfgNexentBase: document.getElementById('cfgNexentBase'),
+    cfgAgentId: document.getElementById('cfgAgentId'),
+    cfgVersionNo: document.getElementById('cfgVersionNo'),
+    cfgLocalBase: document.getElementById('cfgLocalBase'),
+    modal: document.getElementById('modal'),
+    modalIcon: document.getElementById('modalIcon'),
+    modalTitle: document.getElementById('modalTitle'),
+    modalMessage: document.getElementById('modalMessage'),
+    modalCancel: document.getElementById('modalCancel'),
+    modalConfirm: document.getElementById('modalConfirm'),
+    toast: document.getElementById('toast')
+  };
+
+  let appConfig = loadConfig();
+  let store = loadStore();
+  let isRequesting = false;
+  let pendingConversationId = null;
+  let requestContext = null;
+  let animateMessageId = null;
+  let typewriterToken = 0;
+  let modalConfirmHandler = null;
+  let modalCloseTimer = null;
+  let toastTimer = null;
+  let draftByConversation = new Map();
+  let pendingImage = null;
+  let caseDraft = { eye: '', lesion: '', location: '', severity: '', modality: '', note: '' };
+  let feedbackNoteByConversation = new Map();
+
+  function $(selector, root) { return (root || document).querySelector(selector); }
+  function uid(prefix) {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') return prefix + '-' + window.crypto.randomUUID();
+    return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  }
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined && text !== null) node.textContent = String(text);
+    return node;
+  }
+  function svgIcon(name, className) {
+    const span = document.createElement('span');
+    span.className = className || 'inline-flex flex-none items-center justify-center';
+    span.innerHTML = ICONS[name] || '';
+    return span;
+  }
+  function cleanText(value) { return typeof value === 'string' ? value.replace(/\u0000/g, '').trim() : ''; }
+  function truncate(value, limit) {
+    const text = String(value || '').replace(/\s+/g, ' ').trim();
+    return text.length > limit ? text.slice(0, limit) + '…' : text;
+  }
+  function fileSize(size) {
+    if (!Number.isFinite(size)) return '';
+    if (size < 1024) return size + ' B';
+    if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
+    return (size / 1024 / 1024).toFixed(1) + ' MB';
+  }
+  function withBase(base, path) {
+    const cleanBase = String(base || '').replace(/\/+$/, '');
+    return cleanBase ? cleanBase + path : path;
+  }
+  function isAbsoluteUrl(value) {
+    return typeof value === 'string' && /^https?:\/\//i.test(value);
+  }
+  async function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const helper = document.createElement('textarea');
+    helper.value = text;
+    helper.style.position = 'fixed';
+    helper.style.opacity = '0';
+    document.body.appendChild(helper);
+    helper.select();
+    const ok = document.execCommand('copy');
+    helper.remove();
+    if (!ok) throw new Error('copy failed');
+  }
+
+  function loadConfig() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(CONFIG_KEY) || 'null');
+      return { ...DEFAULT_CONFIG, ...(parsed && typeof parsed === 'object' ? parsed : {}) };
+    } catch (error) {
+      return { ...DEFAULT_CONFIG };
+    }
+  }
+  function saveConfig() {
+    try { localStorage.setItem(CONFIG_KEY, JSON.stringify(appConfig)); }
+    catch (error) { console.warn('保存连接配置失败', error); }
+  }
+
+  function newConversation() {
+    const now = Date.now();
+    return {
+      id: uid('conv'), title: '新对话', createdAt: now, updatedAt: now,
+      nexentConversationId: null, yanweiAssetId: '', localSessionId: '', messages: []
+    };
+  }
+
+  function normalizeAttachment(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    return {
+      name: cleanText(raw.name).slice(0, 160) || '眼底图片',
+      type: cleanText(raw.type),
+      size: Number(raw.size) || 0,
+      preview: typeof raw.preview === 'string' ? raw.preview : ''
+    };
+  }
+
+  function normalizeCandidate(raw, index) {
+    if (!raw || typeof raw !== 'object') return null;
+    const source = raw.source && typeof raw.source === 'object' ? raw.source : {};
+    return {
+      rank: Number(raw.rank) || index + 1,
+      regionId: cleanText(raw.region_id),
+      score: Number(raw.score),
+      retrievalScore: Number(raw.retrieval_score),
+      retrievalNorm: Number(raw.retrieval_norm),
+      consistencyScore: Number(raw.consistency_score),
+      profile: raw.profile && typeof raw.profile === 'object' ? raw.profile : {},
+      profileDisplay: raw.profile_display && typeof raw.profile_display === 'object' ? raw.profile_display : {},
+      imageUrl: cleanText(raw.image_url),
+      regionImageUrl: cleanText(raw.region_image_url),
+      regionNote: cleanText(raw.region_note),
+      semanticScores: raw.semantic_scores && typeof raw.semantic_scores === 'object' ? raw.semantic_scores : null,
+      source: {
+        caseId: cleanText(source.case_id),
+        imageId: cleanText(source.image_id),
+        officialSource: cleanText(source.official_source),
+        officialLocator: cleanText(source.official_locator),
+        provenanceTier: cleanText(source.provenance_tier),
+        maskPath: cleanText(source.mask_path)
+      }
+    };
+  }
+
+  function normalizeEvidence(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    return {
+      viewUrl: cleanText(raw.view_url || raw.evidence_url),
+      actionLabel: cleanText(raw.action_label),
+      actionReason: cleanText(raw.action_reason),
+      actionSource: cleanText(raw.action_source),
+      decidedBy: cleanText(raw.decided_by),
+      overridden: raw.overridden === true,
+      hitRules: Array.isArray(raw.hit_rules) ? raw.hit_rules.slice(0, 10) : [],
+      provenance: raw.provenance && typeof raw.provenance === 'object' ? raw.provenance : null,
+      caveats: Array.isArray(raw.caveats) ? raw.caveats.slice(0, 20) : [],
+      logic: raw.logic && typeof raw.logic === 'object' ? raw.logic : null
+    };
+  }
+
+  function normalizeResult(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    if(raw.normalizedVersion === 1 || (typeof raw.actionLabel === 'string' && 'traceId' in raw && Array.isArray(raw.candidates))) return raw;
+    const source = raw.result && typeof raw.result === 'object' ? raw.result : raw;
+    const actionObject = findActionObject(source) || source;
+    if (!actionObject || typeof actionObject !== 'object') return null;
+
+    const action = cleanText(actionObject.action).toUpperCase();
+    const evidence = normalizeEvidence(actionObject.evidence || source.evidence);
+    const logic = (actionObject.logic && typeof actionObject.logic === 'object')
+      ? actionObject.logic
+      : (evidence && evidence.logic ? evidence.logic : null);
+    const query = (actionObject.query && typeof actionObject.query === 'object')
+      ? actionObject.query
+      : ((actionObject.parsed && typeof actionObject.parsed === 'object') ? actionObject.parsed : null);
+    const candidates = Array.isArray(actionObject.candidates)
+      ? actionObject.candidates.map(normalizeCandidate).filter(Boolean).slice(0, 5)
+      : [];
+
+    if (!action && !evidence && !candidates.length) return null;
+
+    const meta = ACTION_META[action] || ACTION_META.UNKNOWN;
+    const queryCodes = (query && query.codes) || (evidence && evidence.query_codes) || null;
+    const missing = (logic && Array.isArray(logic.missing_required) && logic.missing_required.length)
+      ? logic.missing_required.slice()
+      : ((logic && Array.isArray(logic.missing)) ? logic.missing.slice() : ((query && Array.isArray(query.missing)) ? query.missing.slice() : []));
+    const conflicts = (logic && Array.isArray(logic.conflicts)) ? logic.conflicts.slice(0, 10) : [];
+    const inputConflicts = (query && Array.isArray(query.input_conflicts)) ? query.input_conflicts.slice(0, 10) : [];
+    const sufficiency = Number(
+      (logic && logic.sufficiency) ??
+      (evidence && evidence.logic && evidence.logic.sufficiency) ??
+      actionObject.sufficiency
+    );
+
+    return {
+      normalizedVersion: 1,
+      action: action || 'UNKNOWN',
+      actionLabel: cleanText(actionObject.action_label) || evidence?.actionLabel || meta.label,
+      actionReason: cleanText(actionObject.action_reason) || evidence?.actionReason || meta.summary,
+      actionSource: cleanText(actionObject.action_source) || evidence?.actionSource || '',
+      decidedBy: cleanText(actionObject.decided_by) || evidence?.decidedBy || '',
+      overridden: actionObject.overridden === true || evidence?.overridden === true,
+      hitRules: Array.isArray(actionObject.hit_rules) ? actionObject.hit_rules.slice(0, 10) : (evidence?.hitRules || []),
+      query,
+      queryCodes: queryCodes && typeof queryCodes === 'object' ? queryCodes : null,
+      missing: missing.filter(dim => DIM_META[dim]),
+      conflicts,
+      inputConflicts,
+      sufficiency: Number.isFinite(sufficiency) ? sufficiency : null,
+      logic,
+      candidates,
+      evidence,
+      provenance: evidence?.provenance || (actionObject.provenance && typeof actionObject.provenance === 'object' ? actionObject.provenance : null),
+      caveats: Array.isArray(actionObject.caveats) ? actionObject.caveats.slice(0, 20) : (evidence?.caveats || []),
+      qc: actionObject.qc && typeof actionObject.qc === 'object' ? actionObject.qc : null,
+      multimodal: actionObject.multimodal && typeof actionObject.multimodal === 'object' ? actionObject.multimodal : null,
+      traceId: cleanText(actionObject.trace_id || (evidence?.provenance && evidence.provenance.trace_id)),
+      elapsedMs: Number(actionObject.elapsed_ms),
+      inferred: false
+    };
+  }
+
+  function findActionObject(value, depth) {
+    const level = depth || 0;
+    if (!value || level > 8) return null;
+    if (Array.isArray(value)) {
+      for (const item of value.slice(0, 20)) {
+        const found = findActionObject(item, level + 1);
+        if (found) return found;
+      }
+      return null;
+    }
+    if (typeof value !== 'object') return null;
+    if (typeof value.action === 'string') {
+      const act = value.action.toUpperCase();
+      if (ACTION_META[act] || value.candidates || value.evidence || value.action_reason) return value;
+    }
+    for (const key of Object.keys(value)) {
+      if (['html', 'pages', 'messages', 'streaming_message'].includes(key)) continue;
+      const found = findActionObject(value[key], level + 1);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  function tryParseJson(value) {
+    if (value && typeof value === 'object') return value;
+    if (typeof value !== 'string') return null;
+    let text = value.trim();
+    if (!text) return null;
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    try { return JSON.parse(text); } catch (error) { /* continue */ }
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      try { return JSON.parse(text.slice(start, end + 1)); } catch (error) { /* ignore */ }
+    }
+    return null;
+  }
+
+  function extractStructuredResult(value) {
+    const parsed = tryParseJson(value);
+    if (!parsed) return null;
+    const found = findActionObject(parsed);
+    return found ? normalizeResult(found) : null;
+  }
+
+  function findTextCode(text, field) {
+    const source = String(text || '');
+    const candidates = TEXT_CODES[field] || [];
+    for (const pair of candidates) {
+      const surface = pair[0];
+      const code = pair[1];
+      let from = 0;
+      while (from < source.length) {
+        const index = source.indexOf(surface, from);
+        if (index < 0) break;
+        const before = source.slice(Math.max(0, index - 5), index);
+        if (!/(?:未见|未见明显|没有|无|排除|否认|非)/.test(before)) return code;
+        from = index + surface.length;
+      }
+    }
+    return null;
+  }
+
+  function inferProfileFromText(text) {
+    const codes = {};
+    for (const dim of Object.keys(DIM_META)) {
+      const code = findTextCode(text, dim);
+      if (code) codes[dim] = code;
+    }
+    return {
+      codes,
+      present: Object.keys(codes),
+      missing: Object.keys(DIM_META).filter(dim => !codes[dim])
+    };
+  }
+
+  function inferResultFromText(text) {
+    const upper = String(text || '').toUpperCase();
+    let action = '';
+    for (const key of Object.keys(ACTION_META)) {
+      if (key !== 'UNKNOWN' && upper.includes(key)) { action = key; break; }
+    }
+    if (!action) {
+      if (/建议转诊|转诊指征|转诊建议/.test(text)) action = 'SUGGEST_REFERRAL';
+      else if (/建议重拍|重新拍摄|图像质量.*(?:不足|不合格)/.test(text)) action = 'RETAKE_IMAGE';
+      else if (/信息不足|需要补充|请补充|请问.*(?:哪只眼|位置|病灶)/.test(text)) action = 'ASK_MORE';
+      else if (/证据不足|无法判断|暂不检索|拒答|不能给出结论/.test(text)) action = 'ABSTAIN';
+      else if (/候选病例|相似病例|可比先例|研究用候选/.test(text)) action = 'RETURN_CASES';
+    }
+    if (!action) return null;
+    const profile = inferProfileFromText(text);
+    const meta = ACTION_META[action] || ACTION_META.UNKNOWN;
+    return {
+      action,
+      actionLabel: meta.label,
+      actionReason: meta.summary,
+      actionSource: 'final_answer_inferred',
+      decidedBy: 'frontend_inference',
+      overridden: false,
+      hitRules: [],
+      query: { codes: profile.codes, present: profile.present, missing: profile.missing },
+      queryCodes: profile.codes,
+      missing: profile.missing,
+      conflicts: [],
+      inputConflicts: [],
+      sufficiency: null,
+      logic: null,
+      candidates: [],
+      evidence: null,
+      provenance: null,
+      caveats: [],
+      qc: null,
+      multimodal: null,
+      traceId: '',
+      elapsedMs: null,
+      inferred: true
+    };
+  }
+
+  function normalizeMessage(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const content = typeof raw.content === 'string' ? raw.content : (typeof raw.text === 'string' ? raw.text : '');
+    if (!content && !raw.attachment) return null;
+    const role = ['user', 'assistant', 'error', 'system'].includes(raw.role) ? raw.role : 'assistant';
+    return {
+      id: typeof raw.id === 'string' && raw.id ? raw.id : uid('msg'),
+      role,
+      content,
+      createdAt: Number.isFinite(Number(raw.createdAt)) ? Number(raw.createdAt) : Date.now(),
+      result: raw.result ? normalizeResult(raw.result) : null,
+      attachment: normalizeAttachment(raw.attachment),
+      feedback: raw.feedback && typeof raw.feedback === 'object' ? raw.feedback : null,
+      streamed: raw.streamed === true,
+      inferred: raw.inferred === true
+    };
+  }
+
+  function normalizeConversation(raw) {
+    if (!raw || typeof raw !== 'object' || typeof raw.id !== 'string') return null;
+    const now = Date.now();
+    const messages = Array.isArray(raw.messages) ? raw.messages.map(normalizeMessage).filter(Boolean) : [];
+    return {
+      id: raw.id,
+      title: cleanText(raw.title) || '新对话',
+      createdAt: Number.isFinite(Number(raw.createdAt)) ? Number(raw.createdAt) : now,
+      updatedAt: Number.isFinite(Number(raw.updatedAt)) ? Number(raw.updatedAt) : now,
+      nexentConversationId: raw.nexentConversationId ? String(raw.nexentConversationId) : null,
+      yanweiAssetId: cleanText(raw.yanweiAssetId),
+      localSessionId: cleanText(raw.localSessionId),
+      messages
+    };
+  }
+
+  function loadStore() {
+    for (const key of [STORAGE_KEY, LEGACY_KEY]) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        const conversations = Array.isArray(parsed && parsed.conversations)
+          ? parsed.conversations.map(normalizeConversation).filter(Boolean)
+          : [];
+        if (!conversations.length) continue;
+        return {
+          version: 2,
+          activeId: conversations.some(item => item.id === parsed.activeId) ? parsed.activeId : conversations[0].id,
+          conversations
+        };
+      } catch (error) {
+        console.warn('读取本地对话失败', key, error);
+      }
+    }
+    return { version: 2, activeId: null, conversations: [] };
+  }
+
+  function saveStore() {
+    const active = getActiveConversation();
+    if (active) draftByConversation.set(active.id, els.promptInput.value);
+    const sorted = [...store.conversations].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, MAX_CONVERSATIONS);
+    if (store.activeId && !sorted.some(item => item.id === store.activeId)) {
+      const current = store.conversations.find(item => item.id === store.activeId);
+      if (current) sorted.unshift(current);
+    }
+    store.conversations = sorted;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+      return true;
+    } catch (error) {
+      console.warn('保存本地对话失败', error);
+      showToast('本地存储失败，可能是浏览器存储空间不足', 'error');
+      return false;
+    }
+  }
+
+  function getActiveConversation() {
+    return store.conversations.find(item => item.id === store.activeId) || null;
+  }
+  function getConversation(id) {
+    return store.conversations.find(item => item.id === id) || null;
+  }
+  function getLatestResult(conversation) {
+    const conv = conversation || getActiveConversation();
+    if (!conv) return null;
+    const latest=conv.messages[conv.messages.length-1];
+    return latest?.role === 'assistant' ? latest.result || null : null;
+  }
+  function getLatestAssistantMessage(conversation) {
+    const conv = conversation || getActiveConversation();
+    if (!conv) return null;
+    const latest=conv.messages[conv.messages.length-1];
+    return latest?.role === 'assistant' && latest.result ? latest : null;
+  }
+
+  function formatSidebarTime(timestamp) {
+    const date = new Date(timestamp);
+    if (!Number.isFinite(date.getTime())) return '';
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    if (diff >= 0 && diff < 60000) return '刚刚';
+    if (diff >= 0 && diff < 3600000) return Math.max(1, Math.floor(diff / 60000)) + ' 分钟前';
+    if (date.toDateString() === now.toDateString()) return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) return '昨天';
+    return date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+  }
+  function formatMessageTime(timestamp) {
+    const date = new Date(timestamp);
+    if (!Number.isFinite(date.getTime())) return '';
+    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  function makeTitle(text) {
+    const oneLine = String(text || '').replace(/\s+/g, ' ').trim();
+    return oneLine.length > 22 ? oneLine.slice(0, 22) + '…' : (oneLine || '新对话');
+  }
+  function getPreview(conversation) {
+    if (!conversation.messages.length) return '开始新的病例对话';
+    const last = conversation.messages[conversation.messages.length - 1];
+    if (last.role === 'error') return '本轮请求未完成';
+    if (last.attachment && !last.content) return '已提交眼底图片';
+    return truncate(last.content, 46) || '继续对话';
+  }
+  function renderModeBadge() {
+    if (!els.modeBadgeText) return;
+    els.modeBadgeText.textContent = appConfig.mode === 'nexent'
+      ? '统一托管 · 眼维智能体'
+      : '离线演示 · 未经过 Nexent';
+  }
+
+  function renderSidebar() {
+    els.conversationList.replaceChildren();
+    const sorted = [...store.conversations].sort((a, b) => b.updatedAt - a.updatedAt);
+    els.conversationCount.textContent = sorted.length + ' 条';
+    sorted.forEach(conversation => {
+      const item = el('div', 'conversation-item' + (conversation.id === store.activeId ? ' active' : ''));
+      item.dataset.conversationId = conversation.id;
+      const selectBtn = el('button', 'conversation-select');
+      selectBtn.type = 'button';
+      selectBtn.title = conversation.title;
+      selectBtn.setAttribute('aria-current', conversation.id === store.activeId ? 'page' : 'false');
+      const titleRow = el('div', 'flex items-center gap-2 pr-1');
+      const title = el('span', 'min-w-0 flex-1 truncate text-[12.5px] font-medium ' + (conversation.id === store.activeId ? 'text-[#e8fff7]' : 'text-white/63'), conversation.title);
+      titleRow.appendChild(title);
+      if (requestContext && requestContext.conversationId === conversation.id && !requestContext.deleted) {
+        const pending = el('span', 'h-1.5 w-1.5 flex-none rounded-full bg-[#6ee7b7] animate-pulse');
+        pending.title = '正在处理';
+        titleRow.appendChild(pending);
+      }
+      const latestResult = getLatestResult(conversation);
+      if (latestResult && latestResult.action) {
+        const meta = ACTION_META[latestResult.action] || ACTION_META.UNKNOWN;
+        const badge = el('span', 'h-1.5 w-1.5 flex-none rounded-full');
+        badge.style.background = { mint: '#6ee7b7', amber: '#fbbf24', red: '#fb7185', violet: '#a78bfa', blue: '#38bdf8', slate: '#94a3b8' }[meta.tone] || '#94a3b8';
+        badge.title = meta.label;
+        titleRow.appendChild(badge);
+      }
+      const previewRow = el('div', 'mt-1.5 flex items-center gap-2');
+      previewRow.appendChild(el('span', 'min-w-0 flex-1 truncate text-[10.5px] text-white/27', getPreview(conversation)));
+      previewRow.appendChild(el('span', 'flex-none text-[9.5px] tabular-nums text-white/20', formatSidebarTime(conversation.updatedAt)));
+      selectBtn.append(titleRow, previewRow);
+      selectBtn.addEventListener('click', () => activateConversation(conversation.id));
+
+      const deleteBtn = el('button', 'conversation-delete');
+      deleteBtn.type = 'button';
+      deleteBtn.innerHTML = ICONS.trash;
+      deleteBtn.title = '删除对话';
+      deleteBtn.setAttribute('aria-label', '删除对话：' + conversation.title);
+      deleteBtn.addEventListener('click', event => {
+        event.stopPropagation();
+        handleDeleteConversation(conversation.id);
+      });
+      item.append(selectBtn, deleteBtn);
+      els.conversationList.appendChild(item);
+    });
+  }
+
+  function createAndActivateConversation() {
+    const active = getActiveConversation();
+    if (active) draftByConversation.set(active.id, els.promptInput.value);
+    const conversation = newConversation();
+    store.conversations.unshift(conversation);
+    store.activeId = conversation.id;
+    saveStore();
+    clearPendingImage();
+    els.promptInput.value = '';
+    resizePrompt();
+    updateComposer();
+    renderSidebar();
+    renderConversation({ scroll: 'instant' });
+    renderDecisionPanel();
+    closeSidebar();
+    window.setTimeout(() => els.promptInput.focus(), 80);
+  }
+  function activateConversation(id) {
+    if (!getConversation(id)) return;
+    if (store.activeId === id) { closeSidebar(); return; }
+    const previous = getActiveConversation();
+    if (previous) draftByConversation.set(previous.id, els.promptInput.value);
+    store.activeId = id;
+    saveStore();
+    els.promptInput.value = draftByConversation.get(id) || '';
+    resizePrompt();
+    updateComposer();
+    renderSidebar();
+    renderConversation({ scroll: 'instant' });
+    renderDecisionPanel();
+    closeSidebar();
+    window.setTimeout(() => els.promptInput.focus(), 80);
+  }
+  function handleDeleteConversation(id) {
+    const conversation = getConversation(id);
+    if (!conversation) return;
+    openModal({
+      type: 'delete',
+      title: '删除这条对话？',
+      message: '“' + conversation.title + '”及其中的病例信息、候选与医生反馈将从当前浏览器永久删除，无法恢复。',
+      cancelText: '取消', confirmText: '删除', confirmVariant: 'danger',
+      onConfirm: () => deleteConversation(id)
+    });
+  }
+  function deleteConversation(id) {
+    if (requestContext && requestContext.conversationId === id) {
+      requestContext.deleted = true;
+      requestContext.controller.abort();
+    }
+    store.conversations = store.conversations.filter(item => item.id !== id);
+    draftByConversation.delete(id);
+    feedbackNoteByConversation.delete(id);
+    if (!store.conversations.length) {
+      const replacement = newConversation();
+      store.conversations.push(replacement);
+      store.activeId = replacement.id;
+    } else if (store.activeId === id) {
+      store.activeId = [...store.conversations].sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
+    }
+    const active = getActiveConversation();
+    els.promptInput.value = active ? (draftByConversation.get(active.id) || '') : '';
+    resizePrompt();
+    saveStore();
+    updateComposer();
+    renderSidebar();
+    renderConversation({ scroll: 'instant' });
+    renderDecisionPanel();
+    showToast('对话已删除');
+  }
+
+  function openOverlay(overlay) {
+    if (!overlay) return;
+    if (overlay._closeTimer) { window.clearTimeout(overlay._closeTimer); overlay._closeTimer = null; }
+    overlay.hidden = false;
+    window.requestAnimationFrame(() => overlay.classList.add('is-visible'));
+  }
+  function closeOverlay(overlay) {
+    if (!overlay || overlay.hidden) return;
+    overlay.classList.remove('is-visible');
+    overlay._closeTimer = window.setTimeout(() => {
+      overlay.hidden = true;
+      overlay._closeTimer = null;
+    }, 170);
+  }
+
+  function openCaseModal(field, value) {
+    if (field && value) caseDraft[field] = value;
+    syncCaseButtons();
+    updateCasePreview();
+    openOverlay(els.caseModal);
+    window.setTimeout(() => {
+      const target = field ? $(`[data-case-group="${field}"] .choice-chip`) : null;
+      (target || els.caseNoteInput).focus();
+    }, 80);
+  }
+  function closeCaseModal() { closeOverlay(els.caseModal); }
+  function resetCaseDraft() {
+    caseDraft = { eye: '', lesion: '', location: '', severity: '', modality: '', note: '' };
+    els.caseNoteInput.value = '';
+    syncCaseButtons();
+    updateCasePreview();
+  }
+  function syncCaseButtons() {
+    document.querySelectorAll('[data-case-field]').forEach(button => {
+      const selected = caseDraft[button.dataset.caseField] === button.dataset.caseValue;
+      button.classList.toggle('selected', selected);
+      button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    if (els.caseNoteInput && els.caseNoteInput.value !== caseDraft.note) els.caseNoteInput.value = caseDraft.note;
+  }
+  function composeCaseQuery() {
+    const parts = [];
+    if (caseDraft.eye) parts.push(caseDraft.eye);
+    const clinical = [caseDraft.location, caseDraft.severity, caseDraft.lesion].filter(Boolean).join('');
+    if (clinical) parts.push(clinical);
+    if (caseDraft.modality) parts.push(caseDraft.modality);
+    let result = parts.join('，');
+    const note = cleanText(caseDraft.note);
+    if (note) result += (result ? '。补充：' : '') + note;
+    else if (result) result += '。';
+    return result;
+  }
+  function updateCasePreview() {
+    const text = composeCaseQuery();
+    els.casePreview.textContent = text || '请选择眼别、病灶与位置，或直接输入补充描述。';
+  }
+  function applyCaseToComposer(sendNow) {
+    const text = composeCaseQuery();
+    if (!text && !pendingImage) {
+      showToast('请先选择病例信息或上传图片', 'error');
+      return;
+    }
+    els.promptInput.value = text;
+    resizePrompt();
+    updateComposer();
+    closeCaseModal();
+    if (sendNow) sendPrompt({ text });
+    else window.setTimeout(() => els.promptInput.focus(), 90);
+  }
+
+  function openSettingsModal() {
+    els.cfgMode.value = appConfig.mode;
+    els.cfgNexentBase.value = appConfig.nexentBase || '';
+    els.cfgAgentId.value = appConfig.agentId || '';
+    els.cfgVersionNo.value = appConfig.versionNo || '';
+    els.cfgLocalBase.value = appConfig.localBase || '';
+    openOverlay(els.settingsModal);
+  }
+  function closeSettingsModal() { closeOverlay(els.settingsModal); }
+  function saveSettingsFromForm(event) {
+    event.preventDefault();
+    const agentId = cleanText(els.cfgAgentId.value);
+    if (els.cfgMode.value === 'nexent' && (!agentId || !/^\d+$/.test(agentId) || Number(agentId) < 1)) {
+      showToast('Agent ID 必须是正整数', 'error');
+      els.cfgAgentId.focus();
+      return;
+    }
+    const versionNo = cleanText(els.cfgVersionNo.value);
+    if (versionNo && (!/^\d+$/.test(versionNo) || Number(versionNo) < 1)) {
+      showToast('版本号必须是正整数或留空', 'error');
+      els.cfgVersionNo.focus();
+      return;
+    }
+    appConfig = {
+      mode: els.cfgMode.value === 'local' ? 'local' : 'nexent',
+      nexentBase: '',
+      agentId,
+      versionNo,
+      localBase: ''
+    };
+    saveConfig();
+    appConfig.mode = 'nexent'; renderModeBadge();
+    closeSettingsModal();
+    showToast('连接配置已保存');
+  }
+
+  function openImagePicker() {
+    if (isRequesting) return;
+    els.imageInput.click();
+  }
+  function makeThumbnail(file) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onerror = () => resolve('');
+      reader.onload = () => {
+        const image = new Image();
+        image.onerror = () => resolve('');
+        image.onload = () => {
+          try {
+            const max = 520;
+            const scale = Math.min(1, max / Math.max(image.width, image.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.width * scale));
+            canvas.height = Math.max(1, Math.round(image.height * scale));
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.76));
+          } catch (error) { resolve(''); }
+        };
+        image.src = String(reader.result || '');
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  async function handleImageFile(file) {
+    if (!file) return;
+    const validType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || /\.(jpe?g|png|webp)$/i.test(file.name);
+    if (!validType) { openModal({ type: 'error', title: '图片格式不支持', message: '请上传 JPEG、PNG 或 WebP 格式的眼底图片。', confirmText: '知道了' }); return; }
+    if (file.size > 8 * 1024 * 1024) { openModal({ type: 'error', title: '图片过大', message: '单张图片不能超过 8 MB。', confirmText: '知道了' }); return; }
+    if (pendingImage && pendingImage.objectUrl) URL.revokeObjectURL(pendingImage.objectUrl);
+    const objectUrl = URL.createObjectURL(file);
+    pendingImage = { file, objectUrl, preview: '', name: file.name, type: file.type || 'image/jpeg', size: file.size };
+    renderPendingImage();
+    updateComposer();
+    pendingImage.preview = await makeThumbnail(file);
+    if (pendingImage && pendingImage.file === file) renderPendingImage();
+  }
+  function renderPendingImage() {
+    if (!pendingImage) {
+      els.attachmentPreview.hidden = true;
+      els.attachmentThumb.removeAttribute('src');
+      return;
+    }
+    els.attachmentPreview.hidden = false;
+    els.attachmentThumb.src = pendingImage.preview || pendingImage.objectUrl;
+    els.attachmentName.textContent = pendingImage.name;
+    els.attachmentMeta.textContent = fileSize(pendingImage.size) + ' · 待随本轮提交';
+  }
+  function clearPendingImage() {
+    if (pendingImage && pendingImage.objectUrl) URL.revokeObjectURL(pendingImage.objectUrl);
+    pendingImage = null;
+    if (els.imageInput) els.imageInput.value = '';
+    renderPendingImage();
+    updateComposer();
+  }
+  function resizePrompt() {
+    const input = els.promptInput;
+    input.style.height = '0px';
+    const desired = Math.min(input.scrollHeight, 176);
+    input.style.height = Math.max(31, desired) + 'px';
+    input.style.overflowY = input.scrollHeight > 176 ? 'auto' : 'hidden';
+  }
+  function updateComposer() {
+    const hasText = els.promptInput.value.trim().length > 0;
+    const hasImage = !!pendingImage;
+    els.sendBtn.disabled = isRequesting || (!hasText && !hasImage);
+    els.sendIcon.hidden = isRequesting;
+    els.sendSpinner.hidden = !isRequesting;
+    els.sendBtn.setAttribute('aria-busy', isRequesting ? 'true' : 'false');
+    els.sendBtn.title = isRequesting ? '智能体正在回复' : ((hasText || hasImage) ? '发送病例' : '请输入病例信息');
+    els.charCount.textContent = els.promptInput.value.length.toLocaleString('zh-CN') + ' / 8000';
+    els.promptInput.placeholder = isRequesting
+      ? '智能体正在处理，本轮完成后可继续输入'
+      : '描述眼别、病灶与位置，或点击“病例录入”按五维填写';
+    if (isRequesting) {
+      els.caseEntryBtn.disabled = true;
+      els.imageBtn.disabled = true;
+    } else {
+      els.caseEntryBtn.disabled = false;
+      els.imageBtn.disabled = false;
+    }
+  }
+
+  function resolveLocalAssetUrl(value) {
+    const url = cleanText(value);
+    if (!url || isAbsoluteUrl(url) || /^(?:data:|blob:)/i.test(url)) return url;
+    if (!appConfig.localBase) return url;
+    return withBase(appConfig.localBase, url.startsWith('/') ? url : '/' + url);
+  }
+
+  function buildHistory(conversation) {
+    return conversation.messages
+      .filter(message => (message.role === 'user' || message.role === 'assistant') && cleanText(message.content))
+      .slice(-24)
+      .map(message => ({ role: message.role, content: message.content }));
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        resolve(result.includes(',') ? result.split(',')[1] : result);
+      };
+      reader.onerror = () => reject(reader.error || new Error('读取图片失败'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function uploadToLocal(file, signal) {
+    const data = await fileToBase64(file);
+    const response = await fetch(withBase(appConfig.localBase, '/api/upload'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: file.name, data }),
+      signal
+    });
+    const raw = await response.text();
+    let result = null;
+    try { result = raw ? JSON.parse(raw) : null; } catch (error) { result = raw; }
+    if (!response.ok || !result || result.ok === false) throw new Error(extractErrorMessage(result, response.status, raw));
+    const assetId = result.asset && result.asset.asset_id;
+    if (!assetId) throw new Error('本地后端未返回有效图片资产 ID');
+    return { assetId };
+  }
+
+  async function uploadToNexent(file, signal) {
+    const form = new FormData();
+    form.append('files', file);
+    form.append('folder', 'attachments');
+    const response = await fetch(withBase(appConfig.nexentBase, '/api/file/storage'), {
+      method: 'POST',
+      credentials: 'include',
+      body: form,
+      signal
+    });
+    const raw = await response.text();
+    let data = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch (error) { data = raw; }
+    if (!response.ok || !data || data.ok === false) throw new Error(extractErrorMessage(data, response.status, raw));
+    const items = Array.isArray(data.results) ? data.results
+      : (Array.isArray(data.data?.results) ? data.data.results : (Array.isArray(data.data) ? data.data : []));
+    const item = items.find(entry => entry && (entry.success === true || entry.object_name || entry.objectName)) || items[0];
+    if (!item) throw new Error('Nexent 文件上传未返回 object_name');
+    const objectName = cleanText(item.object_name || item.objectName);
+    if (!objectName) throw new Error('Nexent 文件上传未返回 object_name');
+    return {
+      objectName,
+      minioFile: {
+        object_name: objectName,
+        name: file.name,
+        type: file.type || item.content_type || 'application/octet-stream',
+        size: Number(item.file_size) || file.size,
+        url: item.url || '',
+        presigned_url: item.presigned_url || '',
+        description: '眼底病例图片'
+      }
+    };
+  }
+
+  function extractReply(data, rawText) {
+    if (typeof data === 'string') return data.trim();
+    if (!data || typeof data !== 'object') return (rawText || '').trim();
+    const values = [
+      data.reply, data.answer, data.output, data.content, data.final_answer,
+      data.message && typeof data.message === 'object' ? data.message.content : data.message,
+      data.data && data.data.reply, data.data && data.data.answer, data.data && data.data.content,
+      data.data && data.data.final_answer, data.result && data.result.reply,
+      data.result && data.result.answer, data.result && data.result.action_reason,
+      data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content
+    ];
+    for (const value of values) {
+      if (typeof value === 'string' && value.trim()) return value.trim();
+    }
+    return (rawText || '').trim();
+  }
+
+  function extractErrorMessage(data, status, rawText) {
+    if (data && typeof data === 'object') {
+      const sources = [data.error, data.detail, data.message, data.result && data.result.error];
+      for (const source of sources) {
+        if (typeof source === 'string' && source.trim()) return source.trim();
+        if (source && typeof source === 'object') {
+          if (typeof source.message === 'string' && source.message.trim()) return source.message.trim();
+          if (typeof source.hint === 'string' && source.hint.trim()) return source.hint.trim();
+        }
+      }
+    }
+    if (typeof data === 'string' && data.trim()) return data.trim().slice(0, 800);
+    if (rawText && rawText.trim()) return rawText.trim().slice(0, 800);
+    return '请求失败' + (status ? `（HTTP ${status}）` : '');
+  }
+
+  function makeNetworkErrorMessage(error, timedOut) {
+    if (timedOut) return '请求超时。智能体在 180 秒内没有返回结果，请检查 Nexent 运行状态与 MCP 工具耗时。';
+    if (error && error.name === 'AbortError') return '请求已取消。';
+    if (error && error.name === 'TypeError') {
+      return '无法连接服务。请检查接口地址、Nexent 是否已启动、登录 Cookie 是否有效，以及后端是否允许当前页面跨域（CORS）。';
+    }
+    return (error && error.message) ? error.message : '发生未知错误，请稍后重试。';
+  }
+
+  async function callLocalApi(prompt, assetId, conversation, signal) {
+    const response = await fetch(withBase(appConfig.localBase, '/api/chat'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json, text/plain, */*' },
+      body: JSON.stringify({
+        prompt,
+        text: prompt,
+        session_id: conversation.localSessionId || undefined,
+        asset_id: assetId || undefined
+      }),
+      signal
+    });
+    const rawText = await response.text();
+    let data = null;
+    try { data = rawText ? JSON.parse(rawText) : null; } catch (error) { data = rawText; }
+    if (!response.ok || (data && typeof data === 'object' && data.ok === false)) {
+      throw new Error(extractErrorMessage(data, response.status, rawText));
+    }
+    const reply = extractReply(data, rawText);
+    if (!reply) throw new Error('后端返回成功，但没有可显示的消息内容。');
+    return {
+      reply,
+      result: normalizeResult(data && data.result ? data.result : data),
+      localSessionId: data && typeof data === 'object' ? cleanText(data.session_id) : '',
+      structured: true
+    };
+  }
+
+  function parseSseDataLine(line, state) {
+    if (!line.startsWith('data:')) return;
+    const payload = line.slice(5).trim();
+    if (!payload) return;
+    let chunk = null;
+    try { chunk = JSON.parse(payload); } catch (error) { return; }
+    if (!chunk || typeof chunk !== 'object') return;
+    state.chunks += 1;
+
+    const type = cleanText(chunk.type);
+    if(type === 'yanwei_document') { state.medicalRecord=chunk.result; return; }
+    if(type === 'yanwei_result') { state.structured = normalizeResult(chunk.result); if(state.structured && state.onStructured) state.onStructured(state.structured); return; }
+    if(type === 'yanwei_status') { state.structureWarning = cleanText(chunk.message); return; }
+    const content = chunk.content;
+
+    if (type === 'conversation_created') {
+      const parsed = tryParseJson(content);
+      const id = parsed && (parsed.conversation_id || parsed.id);
+      if (id !== undefined && id !== null) state.conversationId = String(id);
+      return;
+    }
+    if (type === 'final_answer') {
+      if (typeof content === 'string') {
+        state.finalAnswer += content;
+        state.onToken(state.finalAnswer);
+      } else if (content && typeof content === 'object') {
+        const text = content.content || content.text || content.answer || '';
+        if (typeof text === 'string') {
+          state.finalAnswer += text;
+          state.onToken(state.finalAnswer);
+        }
+      }
+      return;
+    }
+    if (type === 'error') {
+      const msg = typeof content === 'string' ? content : (content && (content.message || content.error));
+      if (msg) state.errors.push(String(msg));
+      return;
+    }
+
+    // Structured panels accept only the gateway-correlated actual MCP result.
+  }
+
+  async function callNexentApi(prompt, history, minioFile, conversation, signal, onToken, onStructured) {
+    const body = {
+      query: prompt,
+      history,
+      yanwei_asset_id: minioFile || null,
+      is_debug: false,
+      enable_plan: false,
+      agent_id: Number(appConfig.agentId)
+    };
+    if (conversation.nexentConversationId) body.conversation_id = String(conversation.nexentConversationId);
+    if (appConfig.versionNo) body.version_no = Number(appConfig.versionNo);
+
+    const response = await fetch(withBase(appConfig.nexentBase, '/api/agent/run'), {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream, application/json' },
+      body: JSON.stringify(body),
+      signal
+    });
+
+    const headerConversationId = response.headers.get('conversation_id');
+    if (!response.ok) {
+      const raw = await response.text();
+      let data = null;
+      try { data = raw ? JSON.parse(raw) : null; } catch (error) { data = raw; }
+      throw new Error(extractErrorMessage(data, response.status, raw));
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const raw = await response.text();
+      const data = raw ? JSON.parse(raw) : null;
+      const reply = extractReply(data, raw);
+      if (!reply) throw new Error('Nexent 返回 JSON，但没有可显示的消息内容。');
+      return {
+        reply,
+        result: null,
+        conversationId: headerConversationId || (data && (data.conversation_id || data.data?.conversation_id)) || null,
+        structured: false
+      };
+    }
+
+    if (!response.body) throw new Error('Nexent 响应没有可读取的流。');
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    const state = {
+      buffer: '', finalAnswer: '', structured: null, conversationId: headerConversationId || null,
+      chunks: 0, errors: [], onToken, onStructured
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      state.buffer += decoder.decode(value, { stream: true });
+      const lines = state.buffer.split('\n');
+      state.buffer = lines.pop() || '';
+      for (const rawLine of lines) {
+        const line = rawLine.replace(/\r$/, '');
+        parseSseDataLine(line, state);
+      }
+    }
+    if (state.buffer.trim()) parseSseDataLine(state.buffer.trim(), state);
+
+    if(state.medicalRecord){
+      if(state.medicalRecord.ok){
+        window.dispatchEvent(new CustomEvent('yanwei:record',{detail:state.medicalRecord.record}));
+        if(!state.finalAnswer)state.finalAnswer='病历文字已识别，请核对后再检索。';
+      }else{state.errors.push(state.medicalRecord.error?.message||'病历识别失败');}
+    }
+    let reply = state.finalAnswer.trim();
+    let result = state.structured;
+    if (!reply && result) {
+      reply = (result.actionLabel || '智能体返回动作') + '：' + (result.actionReason || '请查看右侧决策面板。');
+    }
+    if (!reply && state.errors.length) throw new Error(state.errors[0]);
+    if (!reply) throw new Error('Nexent SSE 已结束，但没有收到 final_answer。请检查智能体是否真正调用了工具并完成作答。');
+    if (!result && state.structureWarning) reply += '\n\n' + state.structureWarning;
+    return {
+      reply,
+      result,
+      conversationId: state.conversationId,
+      structured: !!state.structured
+    };
+  }
+
+  function updateStreamingBubble(messageId, text) {
+    const row = Array.from(document.querySelectorAll('.message-row')).find(item => item.dataset.messageId === messageId);
+    if (!row) return;
+    const bubble = row.querySelector('.message-content');
+    if (!bubble) return;
+    const stick = isNearBottom(110);
+    bubble.textContent = text || '';
+    bubble.classList.toggle('is-typing', true);
+    if (stick) scrollToBottom('auto');
+  }
+
+  async function sendPrompt(options) {
+    if (isRequesting) return;
+    const settings = options || {};
+    let conversation = getActiveConversation();
+    if (!conversation) {
+      conversation = newConversation();
+      store.conversations.unshift(conversation);
+      store.activeId = conversation.id;
+    }
+    const typed = typeof settings.text === 'string' ? settings.text : els.promptInput.value;
+    const prompt = typed.trim() || (pendingImage ? '请检索与这张眼底图片相似的病例' : '');
+    if (!prompt && !pendingImage) { els.promptInput.focus(); return; }
+
+    const history = buildHistory(conversation);
+    const imageSnapshot = pendingImage ? {
+      file: pendingImage.file,
+      name: pendingImage.name,
+      type: pendingImage.type,
+      size: pendingImage.size,
+      preview: pendingImage.preview || ''
+    } : null;
+    const now = Date.now();
+    const hadUserMessage = conversation.messages.some(message => message.role === 'user');
+    conversation.messages.push({
+      id: uid('msg'), role: 'user', content: prompt, createdAt: now,
+      result: null, attachment: imageSnapshot ? { name: imageSnapshot.name, type: imageSnapshot.type, size: imageSnapshot.size, preview: imageSnapshot.preview } : null
+    });
+    if (!hadUserMessage || conversation.title === '新对话') conversation.title = makeTitle(prompt);
+    conversation.updatedAt = now;
+    draftByConversation.delete(conversation.id);
+    els.promptInput.value = '';
+    resizePrompt();
+    clearPendingImage();
+
+    isRequesting = true;
+    pendingConversationId = conversation.id;
+    const controller = new AbortController();
+    requestContext = { conversationId: conversation.id, controller, deleted: false, timedOut: false };
+    const timeoutId = window.setTimeout(() => {
+      if (requestContext) requestContext.timedOut = true;
+      controller.abort();
+    }, REQUEST_TIMEOUT);
+
+    saveStore();
+    updateComposer();
+    renderSidebar();
+    renderConversation({ scroll: 'smooth' });
+    renderDecisionPanel();
+
+    let streamedMessage = null;
+    let streamInserted = false;
+    const onToken = fullText => {
+      if (!streamInserted) {
+        streamedMessage = {
+          id: uid('msg'), role: 'assistant', content: fullText, createdAt: Date.now(),
+          result: null, attachment: null, feedback: null, streamed: true, inferred: false
+        };
+        conversation.messages.push(streamedMessage);
+        streamInserted = true;
+        if (store.activeId === conversation.id) renderConversation({ scroll: 'auto' });
+      } else {
+        streamedMessage.content = fullText;
+        conversation.updatedAt = Date.now();
+        if (store.activeId === conversation.id) updateStreamingBubble(streamedMessage.id, fullText);
+      }
+    };
+
+    try {
+      let response;
+      if (appConfig.mode === 'nexent') {
+        if (/不使用图片|不用图片|取消图片|移除图片|仅文字|只用文字|不带图/.test(prompt)) conversation.yanweiAssetId = '';
+        const uploaded = imageSnapshot ? await uploadToLocal(imageSnapshot.file, controller.signal) : null;
+        if (uploaded) conversation.yanweiAssetId = uploaded.assetId;
+        const onStructured = result => {
+          if (!streamInserted) onToken('已收到实际工具结果，正在整理说明…');
+          streamedMessage.result = result;
+          saveStore();
+          if (store.activeId === conversation.id) {
+            renderConversation({scroll:'auto'});
+            renderDecisionPanel();
+          }
+        };
+        response = await callNexentApi(prompt, history, conversation.yanweiAssetId || null, conversation, controller.signal, onToken, onStructured);
+        if (response.conversationId) conversation.nexentConversationId = String(response.conversationId);
+      } else {
+        const uploaded = imageSnapshot ? await uploadToLocal(imageSnapshot.file, controller.signal) : null;
+        response = await callLocalApi(prompt, uploaded ? uploaded.assetId : '', conversation, controller.signal);
+        if (response.localSessionId) conversation.localSessionId = response.localSessionId;
+      }
+
+      const result = response.result || null;
+      if (streamInserted && streamedMessage) {
+        if (response.reply) streamedMessage.content = response.reply;
+        streamedMessage.result = result;
+        streamedMessage.streamed = false;
+      } else {
+        const assistantMessage = {
+          id: uid('msg'), role: 'assistant', content: response.reply, createdAt: Date.now(),
+          result, attachment: null, feedback: null, streamed: false,
+          inferred: !!(result && result.inferred)
+        };
+        conversation.messages.push(assistantMessage);
+        if (store.activeId === conversation.id) animateMessageId = assistantMessage.id;
+      }
+      conversation.updatedAt = Date.now();
+      saveStore();
+    } catch (error) {
+      const currentConversation = getConversation(conversation.id);
+      const wasDeleted = !currentConversation || !requestContext || requestContext.deleted;
+      if (!wasDeleted) {
+        if (streamInserted && streamedMessage && !cleanText(streamedMessage.content)) {
+          currentConversation.messages = currentConversation.messages.filter(message => message.id !== streamedMessage.id);
+        }
+        const timedOut = !!(requestContext && requestContext.timedOut);
+        const message = makeNetworkErrorMessage(error, timedOut);
+        currentConversation.messages.push({
+          id: uid('msg'), role: 'error', content: message, createdAt: Date.now(),
+          result: null, attachment: null, streamed: false
+        });
+        currentConversation.updatedAt = Date.now();
+        saveStore();
+        openModal({ type: 'error', title: timedOut ? '请求超时' : '本轮请求失败', message, confirmText: '知道了' });
+      }
+    } finally {
+      window.clearTimeout(timeoutId);
+      if (requestContext && requestContext.controller === controller) {
+        isRequesting = false;
+        pendingConversationId = null;
+        requestContext = null;
+        updateComposer();
+        renderSidebar();
+        renderConversation({ scroll: animateMessageId ? 'smooth' : 'auto' });
+        renderDecisionPanel();
+        window.setTimeout(() => els.promptInput.focus(), 50);
+      }
+    }
+  }
+
+  function createAssistantAvatar(error) {
+    const avatar = el('div', 'assistant-avatar' + (error ? ' error' : ''));
+    avatar.setAttribute('aria-hidden', 'true');
+    avatar.innerHTML = error ? ICONS.alert : ICONS.eye;
+    return avatar;
+  }
+  function createCopyButton(content) {
+    const button = el('button', 'icon-action message-actions');
+    button.type = 'button';
+    button.title = '复制回复';
+    button.setAttribute('aria-label', '复制回复');
+    button.innerHTML = ICONS.copy;
+    button.addEventListener('click', async () => {
+      try { await copyText(content); showToast('已复制到剪贴板'); }
+      catch (error) { showToast('复制失败，请手动选择文本', 'error'); }
+    });
+    return button;
+  }
+  function createActionBadge(action) {
+    const meta = ACTION_META[action] || ACTION_META.UNKNOWN;
+    return el('span', 'action-badge tone-' + meta.tone, (action || 'UNKNOWN') + ' · ' + meta.label);
+  }
+  function getProfileEntries(result, fallbackText) {
+    const codes = { ...(result && result.queryCodes ? result.queryCodes : {}) };
+    if (!Object.keys(codes).length) {
+      const inferred = inferProfileFromText(fallbackText || '');
+      Object.assign(codes, inferred.codes);
+    }
+    return Object.keys(DIM_META).sort((a, b) => DIM_META[a].order - DIM_META[b].order).map(dim => ({
+      dim,
+      label: DIM_META[dim].label,
+      code: codes[dim] || '',
+      value: codes[dim] ? (CODE_LABELS[dim] && CODE_LABELS[dim][codes[dim]] || codes[dim]) : '未填写',
+      missing: !codes[dim]
+    }));
+  }
+  function getMissingDims(result) {
+    if (!result) return [];
+    const dims = new Set(result.missing || []);
+    (result.inputConflicts || []).forEach(conflict => { if (conflict && conflict.dim) dims.add(conflict.dim); });
+    if (!dims.size && result.queryCodes) {
+      Object.keys(DIM_META).forEach(dim => { if (!result.queryCodes[dim]) dims.add(dim); });
+    }
+    return Array.from(dims).filter(dim => DIM_META[dim]);
+  }
+  function getQuickOptions(result, fallbackText) {
+    if (!result) return [];
+    let dims = getMissingDims(result);
+    if (result.action === 'ASK_MORE' && !dims.length) {
+      const inferred = inferProfileFromText(fallbackText || '');
+      dims = inferred.missing;
+    }
+    if (result.action !== 'ASK_MORE' && result.action !== 'ABSTAIN' && result.action !== 'RETAKE_IMAGE') return [];
+    const options = [];
+    dims.slice(0, 4).forEach(dim => {
+      (QUICK_OPTIONS[dim] || []).slice(0, dim === 'lesion' ? 4 : 3).forEach(option => {
+        options.push({ label: option.label, prompt: option.prompt, dim });
+      });
+    });
+    if (!options.length && result.action === 'ASK_MORE') {
+      ['右眼', '左眼', '黄斑区', '微血管瘤', '出血', '散在'].forEach(prompt => {
+        options.push({ label: prompt, prompt, dim: '' });
+      });
+    }
+    return options.slice(0, 10);
+  }
+  function createQuickChips(result, fallbackText) {
+    const options = getQuickOptions(result, fallbackText);
+    if (!options.length) return null;
+    const wrap = el('div', 'quick-options mt-2.5');
+    options.forEach(option => {
+      const button = el('button', 'quick-chip', option.label);
+      button.type = 'button';
+      button.title = option.dim ? '补充' + DIM_META[option.dim].label : '快捷回复';
+      button.addEventListener('click', () => sendPrompt({ text: option.prompt }));
+      wrap.appendChild(button);
+    });
+    return wrap;
+  }
+  function createCandidateStrip(candidates) {
+    if (!candidates || !candidates.length) return null;
+    const grid = el('div', 'candidate-strip');
+    candidates.slice(0, 3).forEach(candidate => {
+      const card = el('div', 'candidate-strip-card');
+      const image = document.createElement('img');
+      const src = resolveLocalAssetUrl(candidate.imageUrl);
+      if (src) {
+        image.src = src;
+        image.alt = (candidate.source.caseId || candidate.regionId || '候选病例') + '预览';
+        image.loading = 'lazy';
+        image.onerror = () => { image.style.display = 'none'; };
+      } else {
+        image.style.display = 'none';
+      }
+      const info = el('div');
+      info.appendChild(el('strong', '', candidate.source.caseId || candidate.regionId || '候选病例'));
+      const profile = candidate.profileDisplay && Object.keys(candidate.profileDisplay).length
+        ? Object.values(candidate.profileDisplay).filter(Boolean).join(' · ')
+        : [candidate.profile.eye, candidate.profile.lesion, candidate.profile.location].filter(Boolean).join(' · ');
+      info.appendChild(el('span', '', truncate(profile || (Number.isFinite(candidate.score) ? '得分 ' + candidate.score.toFixed(3) : '研究用候选'), 26)));
+      card.append(image, info);
+      grid.appendChild(card);
+    });
+    return grid;
+  }
+  function createActionCard(result, fallbackText) {
+    if (!result || !result.action) return null;
+    const meta = ACTION_META[result.action] || ACTION_META.UNKNOWN;
+    const card = el('section', 'action-card');
+    const head = el('div', 'action-card-head');
+    head.appendChild(createActionBadge(result.action));
+    const tags = el('div', 'flex flex-wrap items-center justify-end gap-1.5');
+    if (result.decidedBy) tags.appendChild(el('span', 'rounded-md border border-white/[.06] bg-white/[.025] px-1.5 py-0.5 text-[8.5px] text-white/28', result.decidedBy));
+    if (Number.isFinite(result.sufficiency)) tags.appendChild(el('span', 'rounded-md border border-white/[.06] bg-white/[.025] px-1.5 py-0.5 text-[8.5px] text-white/28', '充分性 ' + result.sufficiency.toFixed(2)));
+    head.appendChild(tags);
+    card.appendChild(head);
+    card.appendChild(el('h4', 'action-card-title', result.actionLabel || meta.label));
+    card.appendChild(el('p', 'action-card-text', result.actionReason || meta.summary));
+
+    if (result.inferred) card.appendChild(el('p', 'mt-2 text-[9.5px] leading-4 text-amber-200/45', '未捕获结构化工具事件，动作由最终回复文本推断，请核对证据卡与原始工具结果。'));
+
+    const profile = getProfileEntries(result, fallbackText);
+    const profileWrap = el('div', 'profile-grid mt-2.5');
+    profile.forEach(item => {
+      const chip = el('span', 'profile-chip' + (item.missing ? ' missing' : ''));
+      chip.appendChild(el('b', '', item.label));
+      chip.appendChild(el('span', '', item.value));
+      profileWrap.appendChild(chip);
+    });
+    card.appendChild(profileWrap);
+
+    const quick = createQuickChips(result, fallbackText);
+    if (quick) card.appendChild(quick);
+
+    const candidates = createCandidateStrip(result.candidates);
+    if (candidates) card.appendChild(candidates);
+
+    const actions = el('div', 'action-inline-actions');
+    const evidenceUrl = result.evidence && result.evidence.viewUrl ? resolveLocalAssetUrl(result.evidence.viewUrl) : '';
+    if (evidenceUrl) {
+      const link = el('a', 'action-link');
+      link.href = evidenceUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.innerHTML = ICONS.external;
+      link.appendChild(el('span', '', '查看证据卡'));
+      actions.appendChild(link);
+    }
+    if (result.action === 'ASK_MORE' || result.action === 'ABSTAIN') {
+      const fill = el('button', 'action-link');
+      fill.type = 'button';
+      fill.innerHTML = ICONS.doc;
+      fill.appendChild(el('span', '', '结构化补充'));
+      fill.addEventListener('click', () => openCaseModal());
+      actions.appendChild(fill);
+    }
+    if (result.action === 'RETAKE_IMAGE') {
+      const upload = el('button', 'action-link');
+      upload.type = 'button';
+      upload.innerHTML = ICONS.image;
+      upload.appendChild(el('span', '', '重新上传图片'));
+      upload.addEventListener('click', openImagePicker);
+      actions.appendChild(upload);
+    }
+    if (actions.childElementCount) card.appendChild(actions);
+    return card;
+  }
+  function createMessageAttachment(attachment) {
+    if (!attachment) return null;
+    const wrap = el('div', 'message-attachment');
+    if (attachment.preview) {
+      const image = document.createElement('img');
+      image.src = attachment.preview;
+      image.alt = attachment.name || '眼底图片';
+      wrap.appendChild(image);
+    } else {
+      wrap.appendChild(svgIcon('image', 'h-[46px] w-[46px] flex-none items-center justify-center rounded-[7px] bg-black/20 text-white/26'));
+    }
+    const info = el('div');
+    info.appendChild(el('strong', '', attachment.name || '眼底图片'));
+    info.appendChild(el('span', '', fileSize(attachment.size) + ' · 随本轮提交'));
+    wrap.appendChild(info);
+    return wrap;
+  }
+  function createMessageNode(message, fallbackText) {
+    const isUser = message.role === 'user';
+    const isError = message.role === 'error';
+    const row = el('article', 'message-row ' + (isUser ? 'user' : 'assistant') + (isError ? ' error' : ''));
+    row.dataset.messageId = message.id;
+    if (!isUser) row.appendChild(createAssistantAvatar(isError));
+    const stack = el('div', 'message-stack');
+    const meta = el('div', 'message-meta');
+    meta.appendChild(el('span', 'message-name', isUser ? '医生' : '眼维'));
+    meta.appendChild(el('span', 'h-[2px] w-[2px] rounded-full bg-white/18'));
+    meta.appendChild(el('span', 'tabular-nums', formatMessageTime(message.createdAt)));
+    if (!isUser && !isError && message.content) meta.appendChild(createCopyButton(message.content));
+    stack.appendChild(meta);
+
+    const bubble = el('div', 'message-bubble message-content');
+    bubble.textContent = message.content || '';
+    if (message.streamed) bubble.classList.add('is-typing');
+    stack.appendChild(bubble);
+
+    if (message.attachment) {
+      const attachment = createMessageAttachment(message.attachment);
+      if (attachment) stack.appendChild(attachment);
+    }
+
+    if (!isUser && !isError && message.result && message.result.action) {
+      const card = createActionCard(message.result, fallbackText);
+      if (card) stack.appendChild(card);
+    }
+    row.appendChild(stack);
+    return { row, bubble };
+  }
+  function createLoadingRow(label) {
+    const row = el('article', 'message-row assistant');
+    row.id = 'loadingRow';
+    row.appendChild(createAssistantAvatar(false));
+    const stack = el('div', 'message-stack');
+    const meta = el('div', 'message-meta');
+    meta.appendChild(el('span', 'message-name', '眼维'));
+    const bubble = el('div', 'message-bubble typing-bubble');
+    bubble.innerHTML = '<span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>';
+    bubble.appendChild(el('span', 'typing-label', label || '正在调用智能体与 MCP 工具'));
+    stack.append(meta, bubble);
+    row.appendChild(stack);
+    return row;
+  }
+  function isNearBottom(threshold) {
+    const node = els.messagesScroll;
+    return node.scrollHeight - node.scrollTop - node.clientHeight < threshold;
+  }
+  function scrollToBottom(behavior) {
+    const node = els.messagesScroll;
+    window.requestAnimationFrame(() => node.scrollTo({ top: node.scrollHeight, behavior: behavior || 'smooth' }));
+  }
+  function renderConversation(options) {
+    const settings = options || {};
+    const conversation = getActiveConversation();
+    const hasMessages = !!conversation && conversation.messages.length > 0;
+    const hasStreaming = !!conversation && conversation.messages.some(message => message.streamed);
+    const showLoading = !!conversation && isRequesting && pendingConversationId === conversation.id && !hasStreaming;
+    typewriterToken += 1;
+    els.messageList.replaceChildren();
+    if (!conversation || (!hasMessages && !showLoading)) {
+      els.emptyState.hidden = false;
+      els.messageList.hidden = true;
+      if (settings.scroll) scrollToBottom('instant');
+      return;
+    }
+    els.emptyState.hidden = true;
+    els.messageList.hidden = false;
+    let animatedBubble = null;
+    const animateId = animateMessageId;
+    let fallbackText = '';
+    conversation.messages.forEach(message => {
+      if (message.role === 'user') fallbackText = message.content;
+      const node = createMessageNode(message, fallbackText);
+      if (message.id === animateId && message.role === 'assistant') animatedBubble = node.bubble;
+      els.messageList.appendChild(node.row);
+    });
+    if (showLoading) els.messageList.appendChild(createLoadingRow());
+    if (animatedBubble) {
+      const message = conversation.messages.find(item => item.id === animateId);
+      const token = typewriterToken;
+      animateMessageId = null;
+      if (message) startTypewriter(animatedBubble, message.content, token);
+    }
+    if (settings.scroll) scrollToBottom(settings.scroll);
+  }
+  function startTypewriter(element, text, token) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      element.textContent = text;
+      return;
+    }
+    const chars = Array.from(text || '');
+    if (!chars.length) { element.textContent = ''; return; }
+    element.textContent = '';
+    element.classList.add('is-typing');
+    const step = Math.max(1, Math.ceil(chars.length / 78));
+    let index = 0;
+    const timer = window.setInterval(() => {
+      if (token !== typewriterToken) { window.clearInterval(timer); return; }
+      const stick = isNearBottom(110);
+      index = Math.min(chars.length, index + step);
+      element.textContent = chars.slice(0, index).join('');
+      if (stick) scrollToBottom('auto');
+      if (index >= chars.length) {
+        window.clearInterval(timer);
+        element.classList.remove('is-typing');
+      }
+    }, 18);
+  }
+
+  function getFallbackTextForConversation(conversation) {
+    if (!conversation) return '';
+    for (let i = conversation.messages.length - 1; i >= 0; i -= 1) {
+      if (conversation.messages[i].role === 'user') return conversation.messages[i].content;
+    }
+    return '';
+  }
+
+  function createMiniCandidate(candidate, index) {
+    const row = el('div', 'candidate-mini');
+    const src = resolveLocalAssetUrl(candidate.imageUrl);
+    if (src) {
+      const image = document.createElement('img');
+      image.src = src;
+      image.alt = (candidate.source.caseId || candidate.regionId || '候选病例') + '预览';
+      image.onerror = () => image.replaceWith(svgIcon('image', 'candidate-thumb-fallback'));
+      row.appendChild(image);
+    } else {
+      row.appendChild(svgIcon('image', 'candidate-thumb-fallback'));
+    }
+    const info = el('div', 'min-w-0 flex-1');
+    info.appendChild(el('strong', '', '#' + (candidate.rank || index + 1) + ' ' + (candidate.source.caseId || candidate.regionId || '研究用候选')));
+    const profile = candidate.profileDisplay && Object.keys(candidate.profileDisplay).length
+      ? Object.values(candidate.profileDisplay).filter(Boolean).join(' · ')
+      : [candidate.profile.eye, candidate.profile.lesion, candidate.profile.location].filter(Boolean).join(' · ');
+    info.appendChild(el('p', '', truncate(profile || '五维画像待补充', 46)));
+    if (Number.isFinite(candidate.score)) info.appendChild(el('p', '', '综合得分 ' + candidate.score.toFixed(4)));
+    if (candidate.regionImageUrl) {
+      const link = el('a', 'mt-1 inline-flex text-[9.5px] text-sky-200/55 hover:text-sky-100', '查看参考区域');
+      link.href = resolveLocalAssetUrl(candidate.regionImageUrl);
+      link.target = '_blank';
+      link.rel = 'noopener';
+      info.appendChild(link);
+    }
+    row.appendChild(info);
+    return row;
+  }
+
+  function renderDecisionPanel() {
+    const conversation = getActiveConversation();
+    const assistant = getLatestAssistantMessage(conversation);
+    const result = assistant && assistant.result;
+    if (!result) {
+      els.decisionEmpty.hidden = false;
+      els.decisionContent.hidden = true;
+      els.decisionContent.replaceChildren();
+      return;
+    }
+    els.decisionEmpty.hidden = true;
+    els.decisionContent.hidden = false;
+    els.decisionContent.replaceChildren();
+    const fallbackText = getFallbackTextForConversation(conversation);
+    const meta = ACTION_META[result.action] || ACTION_META.UNKNOWN;
+
+    const actionSection = el('section', 'decision-section');
+    actionSection.appendChild(el('div', 'decision-section-title', '决策动作'));
+    const actionCard = el('div', 'decision-card');
+    actionCard.appendChild(createActionBadge(result.action));
+    actionCard.appendChild(el('h3', 'action-title', result.actionLabel || meta.label));
+    actionCard.appendChild(el('p', 'action-reason', result.actionReason || meta.summary));
+    if (result.inferred) actionCard.appendChild(el('p', 'mt-2 text-[9.5px] leading-4 text-amber-200/45', '未捕获结构化工具事件，动作由回复文本推断。'));
+    const metaGrid = el('div', 'meta-grid');
+    const metaItems = [
+      ['判定方式', result.decidedBy || '待确认'],
+      ['充分性', Number.isFinite(result.sufficiency) ? result.sufficiency.toFixed(2) : '—'],
+      ['候选数', String(result.candidates.length)],
+      ['Trace', result.traceId ? truncate(result.traceId, 12) : '—']
+    ];
+    metaItems.forEach(([label, value]) => {
+      const box = el('div', 'meta-box');
+      box.appendChild(el('span', '', label));
+      box.appendChild(el('strong', '', value));
+      metaGrid.appendChild(box);
+    });
+    actionCard.appendChild(metaGrid);
+    actionSection.appendChild(actionCard);
+    els.decisionContent.appendChild(actionSection);
+
+    if (result.decidedBy || result.actionSource) {
+      const sourceSection = el('section', 'decision-section');
+      sourceSection.appendChild(el('div', 'decision-section-title', '判定来源'));
+      const card = el('div', 'decision-card');
+      card.appendChild(el('p', 'm-0 break-words text-[10px] leading-5 text-white/35', result.actionSource || result.decidedBy || '工具返回'));
+      if (result.hitRules && result.hitRules.length) card.appendChild(el('p', 'mb-0 mt-2 text-[9.5px] leading-4 text-violet-200/55', '命中规则：' + result.hitRules.join('、')));
+      sourceSection.appendChild(card);
+      els.decisionContent.appendChild(sourceSection);
+    }
+
+    const profileSection = el('section', 'decision-section');
+    profileSection.appendChild(el('div', 'decision-section-title', '五维病例画像'));
+    const profileGrid = el('div', 'profile-grid');
+    getProfileEntries(result, fallbackText).forEach(item => {
+      const chip = el('span', 'profile-chip' + (item.missing ? ' missing' : ''));
+      chip.appendChild(el('b', '', item.label));
+      chip.appendChild(el('span', '', item.value));
+      profileGrid.appendChild(chip);
+    });
+    profileSection.appendChild(profileGrid);
+    els.decisionContent.appendChild(profileSection);
+
+    const missingDims = getMissingDims(result);
+    const conflicts = (result.conflicts || []).concat(result.inputConflicts || []);
+    if (missingDims.length || conflicts.length) {
+      const gapSection = el('section', 'decision-section');
+      gapSection.appendChild(el('div', 'decision-section-title', result.action === 'ASK_MORE' ? '需要补充' : '缺失与冲突'));
+      const card = el('div', 'decision-card space-y-2');
+      if (missingDims.length) card.appendChild(el('p', 'm-0 text-[10.5px] leading-5 text-amber-200/70', '缺失维度：' + missingDims.map(dim => DIM_META[dim].label).join('、')));
+      conflicts.slice(0, 4).forEach(conflict => {
+        const text = typeof conflict === 'string' ? conflict : (conflict.message || [DIM_META[conflict.dim]?.label, conflict.severity].filter(Boolean).join(' · '));
+        if (text) card.appendChild(el('p', 'm-0 text-[10px] leading-5 text-rose-200/60', text));
+      });
+      gapSection.appendChild(card);
+      const quick = createQuickChips(result, fallbackText);
+      if (quick) { quick.classList.add('mt-2.5'); gapSection.appendChild(quick); }
+      els.decisionContent.appendChild(gapSection);
+    }
+
+    if (result.candidates.length) {
+      const candidateSection = el('section', 'decision-section');
+      candidateSection.appendChild(el('div', 'decision-section-title', '研究用候选'));
+      const card = el('div', 'decision-card');
+      result.candidates.slice(0, 3).forEach((candidate, index) => card.appendChild(createMiniCandidate(candidate, index)));
+      candidateSection.appendChild(card);
+      els.decisionContent.appendChild(candidateSection);
+    }
+
+    const nextSection = el('section', 'decision-section');
+    nextSection.appendChild(el('div', 'decision-section-title', '医生下一步'));
+    const nextCard = el('div', 'space-y-1.5');
+    if (result.action === 'ASK_MORE' || result.action === 'ABSTAIN') {
+      const supplement = el('button', 'doctor-option');
+      supplement.type = 'button';
+      supplement.innerHTML = '<span class="inline-flex items-center gap-2">' + ICONS.doc + '结构化补充病例</span>' + ICONS.chevron;
+      supplement.addEventListener('click', () => openCaseModal());
+      nextCard.appendChild(supplement);
+    }
+    if (result.action === 'RETAKE_IMAGE') {
+      const upload = el('button', 'doctor-option');
+      upload.type = 'button';
+      upload.innerHTML = '<span class="inline-flex items-center gap-2">' + ICONS.image + '重新上传眼底图片</span>' + ICONS.chevron;
+      upload.addEventListener('click', openImagePicker);
+      nextCard.appendChild(upload);
+    }
+    if (result.action === 'RETURN_CASES' || result.action === 'SUGGEST_REFERRAL') {
+      const summary = el('button', 'doctor-option');
+      summary.type = 'button';
+      summary.innerHTML = '<span class="inline-flex items-center gap-2">' + ICONS.feedback + '生成医生复核摘要</span>' + ICONS.chevron;
+      summary.addEventListener('click', () => sendPrompt({ text: '请基于本轮候选病例、动作和证据卡生成一段供医生复核的病例摘要。必须保留病例/区域 ID、溯源字段、PENDING 限制，不得改写工具返回的动作或伪造结论。' }));
+      nextCard.appendChild(summary);
+    }
+    if (result.action === 'SUGGEST_REFERRAL') {
+      const referral = el('button', 'doctor-option');
+      referral.type = 'button';
+      referral.innerHTML = '<span class="inline-flex items-center gap-2">' + ICONS.feedback + '生成转诊摘要</span>' + ICONS.chevron;
+      referral.addEventListener('click', () => sendPrompt({ text: '请生成一份供医生复核的转诊摘要，写明工具返回的建议转诊动作、命中规则、依据、证据卡溯源和仍需人工确认的限制。' }));
+      nextCard.appendChild(referral);
+    }
+    const evidenceUrl = result.evidence && result.evidence.viewUrl ? resolveLocalAssetUrl(result.evidence.viewUrl) : '';
+    if (evidenceUrl) {
+      const link = el('a', 'doctor-option');
+      link.href = evidenceUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.innerHTML = '<span class="inline-flex items-center gap-2">' + ICONS.external + '打开完整证据卡</span>' + ICONS.chevron;
+      nextCard.appendChild(link);
+    }
+    if (nextCard.childElementCount) {
+      nextSection.appendChild(nextCard);
+      els.decisionContent.appendChild(nextSection);
+    }
+
+    const reviewSection = el('section', 'decision-section');
+    reviewSection.appendChild(el('div', 'decision-section-title', '医生复核反馈'));
+    const reviewCard = el('div', 'decision-card');
+    const topCandidate = result.candidates[0];
+    const caseId = topCandidate ? (topCandidate.source.caseId || topCandidate.regionId) : '';
+    reviewCard.appendChild(el('p', 'm-0 mb-2 text-[10px] leading-5 text-white/30', caseId ? '反馈将记录到项目后台：' + truncate(caseId, 26) : '当前动作没有可复核的候选病例，反馈按钮暂不可用。'));
+    const note = el('textarea', 'feedback-note');
+    note.placeholder = '可选：填写医生复核意见或纠正说明';
+    note.value = feedbackNoteByConversation.get(conversation.id) || '';
+    note.addEventListener('input', () => feedbackNoteByConversation.set(conversation.id, note.value));
+    reviewCard.appendChild(note);
+    const feedbackButtons = el('div', 'mt-2 grid grid-cols-2 gap-1.5');
+    [
+      ['ACCEPT', '采纳候选'],
+      ['REJECT', '不采纳'],
+      ['CORRECT', '需要纠正'],
+      ['UNKNOWN', '存疑待核']
+    ].forEach(([verdict, label]) => {
+      const button = el('button', 'doctor-option' + (verdict === 'REJECT' ? ' danger' : ''));
+      button.type = 'button';
+      button.disabled = !caseId || isRequesting;
+      button.innerHTML = '<span>' + label + '</span><span class="text-[8.5px] text-white/22">' + verdict + '</span>';
+      button.addEventListener('click', () => submitDoctorFeedback(verdict));
+      feedbackButtons.appendChild(button);
+    });
+    reviewCard.appendChild(feedbackButtons);
+    if (assistant.feedback) {
+      const record = el('div', 'feedback-record');
+      record.textContent = '已记录 ' + (assistant.feedback.verdict || '') + (assistant.feedback.recordId ? ' · ' + assistant.feedback.recordId : '') + (assistant.feedback.note ? '\n' + assistant.feedback.note : '');
+      reviewCard.appendChild(record);
+    }
+    reviewSection.appendChild(reviewCard);
+    els.decisionContent.appendChild(reviewSection);
+
+    if (result.caveats && result.caveats.length) {
+      const caveatSection = el('section', 'decision-section');
+      const details = document.createElement('details');
+      details.className = 'decision-card';
+      const summary = document.createElement('summary');
+      summary.className = 'cursor-pointer text-[10px] font-semibold text-white/35';
+      summary.textContent = '限制与免责声明';
+      details.appendChild(summary);
+      const list = el('ul', 'mt-2 space-y-1 pl-4 text-[9.5px] leading-4 text-white/25');
+      result.caveats.slice(0, 8).forEach(item => list.appendChild(el('li', '', item)));
+      details.appendChild(list);
+      caveatSection.appendChild(details);
+      els.decisionContent.appendChild(caveatSection);
+    }
+  }
+
+  async function submitDoctorFeedback(verdict) {
+    const conversation = getActiveConversation();
+    const assistant = getLatestAssistantMessage(conversation);
+    const result = assistant && assistant.result;
+    const candidate = result && result.candidates[0];
+    const caseId = candidate ? (candidate.source.caseId || candidate.regionId) : '';
+    if (!conversation || !assistant || !caseId) {
+      showToast('当前没有可反馈的候选病例', 'error');
+      return;
+    }
+    const note = cleanText(feedbackNoteByConversation.get(conversation.id) || '');
+    const body = {
+      case_id: caseId,
+      verdict,
+      note,
+      trace_id: result.traceId || '',
+      idempotency_key: [conversation.id, caseId, verdict, note].join('|')
+    };
+    try {
+      const response = await fetch(withBase(appConfig.localBase, '/api/feedback'), {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const raw = await response.text();
+      let data = null;
+      try { data = raw ? JSON.parse(raw) : null; } catch (error) { data = raw; }
+      if (!response.ok || (data && typeof data === 'object' && data.ok === false)) {
+        throw new Error(extractErrorMessage(data, response.status, raw));
+      }
+      assistant.feedback = {
+        verdict,
+        note,
+        recordId: data && (data.record_id || data.data?.record_id) || '',
+        duplicate: !!(data && data.duplicate),
+        at: Date.now()
+      };
+      conversation.updatedAt = Date.now();
+      saveStore();
+      renderSidebar();
+      renderDecisionPanel();
+      showToast(assistant.feedback.duplicate ? '反馈已存在，未重复写入' : '医生反馈已记录');
+    } catch (error) {
+      openModal({
+        type: 'error',
+        title: '医生反馈写入失败',
+        message: error.message || String(error),
+        confirmText: '知道了'
+      });
+    }
+  }
+
+  function openModal(options) {
+    const config = options || {};
+    els.modalTitle.textContent = config.title || '提示';
+    els.modalMessage.textContent = config.message || '';
+    els.modalIcon.innerHTML = config.type === 'delete' ? ICONS.delete : ICONS.alert;
+    els.modalIcon.className = 'modal-icon' + (config.type === 'delete' ? ' danger' : '');
+    els.modalCancel.hidden = !config.cancelText;
+    els.modalCancel.textContent = config.cancelText || '取消';
+    els.modalConfirm.textContent = config.confirmText || '知道了';
+    els.modalConfirm.className = 'modal-button ' + (config.confirmVariant === 'danger' ? 'danger' : 'primary');
+    modalConfirmHandler = typeof config.onConfirm === 'function' ? config.onConfirm : null;
+    openOverlay(els.modal);
+    window.setTimeout(() => {
+      (config.cancelText ? els.modalCancel : els.modalConfirm).focus();
+    }, 80);
+  }
+  function closeModal() {
+    if (els.modal.hidden) return;
+    closeOverlay(els.modal);
+    modalConfirmHandler = null;
+    window.setTimeout(() => els.promptInput.focus(), 190);
+  }
+  function showToast(message, type) {
+    if (toastTimer) window.clearTimeout(toastTimer);
+    els.toast.textContent = message;
+    els.toast.className = 'toast' + (type === 'error' ? ' error' : '');
+    window.requestAnimationFrame(() => els.toast.classList.add('show'));
+    toastTimer = window.setTimeout(() => {
+      els.toast.classList.remove('show');
+      toastTimer = null;
+    }, 2400);
+  }
+  function openSidebar() {
+    els.sidebar.classList.add('open');
+    els.mobileBackdrop.classList.add('show');
+  }
+  function closeSidebar() {
+    els.sidebar.classList.remove('open');
+    els.mobileBackdrop.classList.remove('show');
+  }
+  function openDecisionPanel() {
+    els.decisionPanel.classList.add('open');
+    els.decisionBackdrop.classList.add('show');
+  }
+  function closeDecisionPanel() {
+    els.decisionPanel.classList.remove('open');
+    els.decisionBackdrop.classList.remove('show');
+  }
+  function handlePromptInput() {
+    resizePrompt();
+    updateComposer();
+    const active = getActiveConversation();
+    if (active) draftByConversation.set(active.id, els.promptInput.value);
+  }
+
+  function bindEvents() {
+    els.newChatBtn.addEventListener('click', createAndActivateConversation);
+    els.menuBtn.addEventListener('click', openSidebar);
+    els.mobileBackdrop.addEventListener('click', closeSidebar);
+    els.decisionToggleBtn.addEventListener('click', openDecisionPanel);
+    els.closeDecisionBtn.addEventListener('click', closeDecisionPanel);
+    els.decisionBackdrop.addEventListener('click', closeDecisionPanel);
+    els.modeBadgeBtn.addEventListener('click', openSettingsModal);
+    els.settingsBtn.addEventListener('click', openSettingsModal);
+    els.closeSettingsBtn.addEventListener('click', closeSettingsModal);
+    els.cancelSettingsBtn.addEventListener('click', closeSettingsModal);
+    els.settingsForm.addEventListener('submit', saveSettingsFromForm);
+
+    els.caseEntryBtn.addEventListener('click', () => openCaseModal());
+    els.emptyCaseBtn.addEventListener('click', () => openCaseModal());
+    els.imageBtn.addEventListener('click', openImagePicker);
+    els.emptyImageBtn.addEventListener('click', openImagePicker);
+    els.removeAttachmentBtn.addEventListener('click', clearPendingImage);
+    els.imageInput.addEventListener('change', event => {
+      const file = event.target.files && event.target.files[0];
+      if (file) handleImageFile(file);
+    });
+    els.closeCaseModalBtn.addEventListener('click', closeCaseModal);
+    els.clearCaseBtn.addEventListener('click', resetCaseDraft);
+    els.fillCaseBtn.addEventListener('click', () => applyCaseToComposer(false));
+    els.submitCaseBtn.addEventListener('click', () => applyCaseToComposer(true));
+    els.caseNoteInput.addEventListener('input', () => {
+      caseDraft.note = els.caseNoteInput.value;
+      updateCasePreview();
+    });
+    document.querySelectorAll('[data-case-field]').forEach(button => {
+      button.addEventListener('click', () => {
+        const field = button.dataset.caseField;
+        const value = button.dataset.caseValue;
+        caseDraft[field] = caseDraft[field] === value ? '' : value;
+        syncCaseButtons();
+        updateCasePreview();
+      });
+    });
+
+    els.promptInput.addEventListener('input', handlePromptInput);
+    els.promptInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+        event.preventDefault();
+        if (!els.sendBtn.disabled) sendPrompt();
+      }
+    });
+    els.promptInput.addEventListener('paste', event => {
+      const items = event.clipboardData && event.clipboardData.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type && item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) {
+            event.preventDefault();
+            handleImageFile(file);
+            break;
+          }
+        }
+      }
+    });
+    els.composerForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!els.sendBtn.disabled) sendPrompt();
+    });
+    document.querySelectorAll('[data-suggestion]').forEach(button => {
+      button.addEventListener('click', () => {
+        els.promptInput.value = button.dataset.suggestion || '';
+        handlePromptInput();
+        els.promptInput.focus();
+        const length = els.promptInput.value.length;
+        els.promptInput.setSelectionRange(length, length);
+      });
+    });
+
+    els.modalCancel.addEventListener('click', closeModal);
+    els.modalConfirm.addEventListener('click', () => {
+      const handler = modalConfirmHandler;
+      closeModal();
+      if (handler) handler();
+    });
+    els.modal.addEventListener('click', event => {
+      if (event.target === els.modal) closeModal();
+    });
+    els.caseModal.addEventListener('click', event => {
+      if (event.target === els.caseModal) closeCaseModal();
+    });
+    els.settingsModal.addEventListener('click', event => {
+      if (event.target === els.settingsModal) closeSettingsModal();
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      if (!els.modal.hidden) { closeModal(); return; }
+      if (!els.settingsModal.hidden) { closeSettingsModal(); return; }
+      if (!els.caseModal.hidden) { closeCaseModal(); return; }
+      closeDecisionPanel();
+      closeSidebar();
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) closeSidebar();
+      if (window.innerWidth > 1200) closeDecisionPanel();
+    });
+  }
+
+  function initialize() {
+    if (!store.conversations.length) {
+      const conversation = newConversation();
+      store.conversations.push(conversation);
+      store.activeId = conversation.id;
+    }
+    if (!store.activeId || !getConversation(store.activeId)) {
+      store.activeId = [...store.conversations].sort((a, b) => b.updatedAt - a.updatedAt)[0].id;
+    }
+    appConfig.mode = 'nexent'; renderModeBadge();
+    bindEvents();
+    resizePrompt();
+    updateComposer();
+    renderSidebar();
+    renderConversation({ scroll: 'instant' });
+    renderDecisionPanel();
+    saveStore();
+    window.setTimeout(() => {
+      if (window.innerWidth > 900) els.promptInput.focus();
+    }, 180);
+  }
+
+  initialize();
+})();
+  </script>
+<script>
+(()=>{const link=document.createElement('a');link.href='/integration';link.textContent='';link.style.cssText='position:fixed;right:24px;bottom:18px;z-index:9999;color:#67e8f9;background:#102330;padding:8px 14px;border-radius:10px;font:13px system-ui';document.body.append(link)})();
+</script>
+<dialog id="recordReviewDialog" style="max-width:760px;width:90%;background:#15212b;color:#e9f4ef;border:1px solid #4d8772;border-radius:16px;padding:24px">
+<h2>核对病历识别文字</h2><p>可能存在眼别、数字或术语识别错误，请核对并修改。确认后才会检索相似病例。</p><textarea id="recordReviewText" maxlength="6000" style="width:100%;min-height:300px;background:#0b1420;color:#eee;padding:12px;border:1px solid #527466"></textarea><p id="recordReviewNotice"></p><button id="recordReviewCancel" type="button">暂不检索</button><button id="recordReviewConfirm" type="button" style="margin-left:20px;background:#62d9b1;color:#10251c;padding:10px">确认文字并检索</button>
+</dialog>
+<script>
+(()=>{
+ let pendingRecord=null;
+ const upload=document.querySelector('#recordFileInput'),hint=document.querySelector('#recordUploadHint');
+ const sendText=text=>{const input=document.querySelector('#promptInput');input.value=text;input.dispatchEvent(new Event('input',{bubbles:true}));};
+ const nativeFetch=window.fetch.bind(window);
+ window.fetch=(url,options)=>{
+   if(String(url).endsWith('/api/agent/run') && options?.body && pendingRecord){
+     const body=JSON.parse(options.body);body.record_asset_id=pendingRecord;
+     options={...options,body:JSON.stringify(body)};
+     return nativeFetch(url,options).then(r=>{if(r.ok)pendingRecord=null;return r});
+   }
+   return nativeFetch(url,options);
+ };
+ document.querySelector('#recordUploadBtn').onclick=()=>upload.click();
+ upload.onchange=async()=>{
+   const file=upload.files[0];if(!file)return;
+   if(!/\.(png|jpg|jpeg|webp)$/i.test(file.name)||file.size>8*1024*1024){hint.textContent='请使用8MB以内的JPG、PNG或WebP病历截图';return;}
+   hint.textContent='正在导入病历截图…';
+   try{
+     const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.readAsDataURL(file);});
+     const response=await nativeFetch('/api/records/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:file.name,data})});
+     const result=await response.json();if(!response.ok||!result.record)throw Error(result.error?.message||'导入失败');
+     pendingRecord=result.record.asset_id;hint.textContent=file.name+' · 点击发送进行识别';
+     sendText('请读取我导入的病历截图，先识别文字供我核对，暂不检索。');
+   }catch(error){hint.textContent=error.message;}
+   upload.value='';
+ };
+ window.addEventListener('yanwei:record',event=>{
+   const record=event.detail;
+   document.querySelector('#recordReviewText').value=record.text||'';
+   document.querySelector('#recordReviewNotice').textContent=record.notice+(record.truncated?' 内容较长，当前仅保留前6000字。':'');
+   hint.textContent='病历文字已识别，等待核对';
+   document.querySelector('#recordReviewDialog').showModal();
+ });
+ document.querySelector('#recordReviewCancel').onclick=()=>document.querySelector('#recordReviewDialog').close();
+ document.querySelector('#recordReviewConfirm').onclick=()=>{
+   const text=document.querySelector('#recordReviewText').value.trim();if(!text)return;
+   pendingRecord=null;hint.textContent='使用已核对病历文字';
+   document.querySelector('#recordReviewDialog').close();sendText('请根据以下我已核对的病历文字检索相似病例，以本轮确认内容为准：\n'+text);
+   document.querySelector('#sendBtn').click();
+ };
+})();
+</script>
+
+</body>
+</html>

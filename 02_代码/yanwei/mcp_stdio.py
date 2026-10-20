@@ -27,11 +27,13 @@ SERVER_INFO = {"name": "yanwei-fundus-retrieval", "version": "1.0.0"}
 _AUTO = "（自动带上版本三元组与耗时；阈值全部读 config/thresholds.yaml，不硬编码）"
 
 TOOL_SCHEMAS = [
+    {"name":"read_medical_record","description":"读取真实上传的病历截图或扫描图片，执行本地中文OCR。只返回待人工核对文字，本轮不要继续检索；用户确认文字后再调用search_cases。", "inputSchema":{"type":"object","properties":{"record_asset_id":{"type":"string","description":"YANWEI_ROUTE中的病历资产ID，逐字传入"},"request_id":{"type":"string","description":"本轮YANWEI_ROUTE中的请求ID"}},"required":["record_asset_id","request_id"]}},
+
     {
         "name": "extract_medical_entities",
         "description": "把自由文本解析成眼科五维结构化实体（眼别/病灶/位置/程度/模态），"
                        "并识别否定项（未见、无）与不确定项（疑似、考虑）。"
-                       "**任何检索之前都先调它**，它是全案唯一的结构真源。" + _AUTO,
+                       "完整检索优先调用search_cases的complete_flow=true；该入口已内含解析，不要重复调用。" + _AUTO,
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -52,6 +54,7 @@ TOOL_SCHEMAS = [
                 "mode": {"type": "string", "enum": ["standard", "region", "negative"],
                          "description": "检索模式，默认 standard"},
                 "query_text": {"type": "string", "description": "病灶描述文本"},
+                "request_id": {"type": "string", "description": "由网关在YANWEI_ROUTE提供的32位本轮ID，必须逐字传入，不能猜测或复用历史ID。"},
                 "modality": {"type": "string", "description": "可选，覆盖文本解析出的模态（如 CFP/UWF）"},
                 "topk": {"type": "integer", "minimum": 1, "maximum": 30, "description": "返回候选数，默认读配置"},
                 "complete_flow": {"type": "boolean", "default": False, "description": "设为true时一次完成解析、检索、门禁、决策和证据；短输入自动追问。推荐智能体使用。"},

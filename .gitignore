@@ -23,3 +23,17 @@ runtime/
 Thumbs.db
 .vscode/
 .idea/
+*.secret.json
+**/本机首次登录信息.txt
+**/agent.json
+*.log
+*.tmp
+*.bak
+work/
+.playwright-mcp/
+cdp_profile/
+**/uploads/
+**/record_scopes/
+**/feedback.jsonl
+**/integration_results/
+01_数据集/_quality/

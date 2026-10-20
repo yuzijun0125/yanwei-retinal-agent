@@ -1,53 +1,48 @@
-# 数据与模型准备
+# 数据、模型与索引准备
 
-## 文字演示
+## 源码与完整部署包
 
-安装 Python 3.12 和根目录 `requirements-demo.txt`，运行 `python 02_代码/run_demo.py --port 8765`。HTTP、BM25 和规则编排使用标准库；Pillow 用于图像读取和部分回归测试。
+Git仓库只包含最新可迭代源码、派生表、配置、部署脚本、工程样例和说明。大体积权重、原图、索引和个人运行状态被排除，因此克隆后不能直接宣称完整图文服务就绪。
 
-派生检索表已随仓库提供；没有原图时只能演示文字、规则及来源信息，网页不会生成缺失的医学图片。
+最快方式：由组长通过团队允许的文件渠道提供 `眼维_统一托管版_20261020.zip`，完整解压，再将以下三个目录复制到本仓库相同位置：
 
-## 图文环境
+| 从完整包复制 | 用途 |
+|---|---|
+| `02_代码/models/` | 固定模型权重及manifest |
+| `01_数据集/图像/` | 对应派生表的IDRiD图像与必要标注 |
+| `04_产物/multimodal/` | 离线图像向量及manifest |
 
-请使用独立虚拟环境。`02_代码/requirements-multimodal.lock.txt` 记录现有环境的精确版本，其中 FLAIR 代码固定到 Git 提交，Torch 使用 CPU 构建。
+不要从旧运行环境复制 `.env`、`本机首次登录信息.txt`、`hosting.secret.json`、agent.json、访客数据库、上传文件或浏览器登录状态。不要用完整包的旧代码覆盖更新后的Git代码。资源不匹配时重建索引，不能静默混用。
+
+## 从原始来源准备
+
+从IDRiD官方渠道按其条款获取原图，核对`01_数据集/silver/silver_image.csv`中的文件与hash。原图路径示例：
+
+```text
+01_数据集/图像/IDRiD/原始图像/Training set/IDRiD_01.jpg
+01_数据集/图像/IDRiD/原始图像/Testing set/IDRiD_55.jpg
+```
+
+模型来源与固定修订见[model-versions.json](model-versions.json)：FLAIR `5f6bdd0a068353dc41a896ba3abdd7c0f6d35938`，ClinicalBERT `d5892b39a4adaed74b92212a44081509db72f87b`。准备脚本需要huggingface-hub，下载需要联网。
 
 ```bash
-python -m venv .venv-multimodal
-# Windows
-.venv-multimodal\Scripts\Activate.ps1
-python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu -r 02_代码/requirements-multimodal.lock.txt
 python 02_代码/tools/download_flair.py
 ```
 
-准备脚本固定模型修订：
+完整运行优先使用Dockerfile.retrieval与deploy/requirements-linux.txt的Linux CPU环境（PyTorch 2.6.0 CPU），FLAIR源码已随integration/vendor提供并保留许可。`requirements-multimodal.lock.txt`是原开发机的历史环境快照，不作为全平台安装保证。
 
-| 模型 | 来源 | 修订 |
-|---|---|---|
-| FLAIR | jusiro2/FLAIR | 5f6bdd0a068353dc41a896ba3abdd7c0f6d35938 |
-| ClinicalBERT | emilyalsentzer/Bio_ClinicalBERT | d5892b39a4adaed74b92212a44081509db72f87b |
-
-安装和权重准备需要联网；依赖可获得性、下载速度与平台支持需按实际环境检查。本仓库没有声称已在所有平台进行全新联网安装验收。
-
-## 原图和索引
-
-从 IDRiD 官方发布渠道按其条款获取原图。论文出处：Porwal 等，*Indian Diabetic Retinopathy Image Dataset (IDRiD)*，Data 2018, 3(3), 25，DOI:10.3390/data3030025。
-
-当前检索表对应原始分割子集的 81 张原图，路径结构为：
-
-```text
-01_数据集/图像/IDRiD/原始图像/
-  Training set/IDRiD_01.jpg ...
-  Testing set/IDRiD_55.jpg ...
-```
-
-以 `01_数据集/silver/silver_image.csv` 中的文件名、划分和 SHA256 为准。旧表路径前缀 `01_数据集本体` 会由代码映射到当前数据目录；不要任意把其他图片重命名成这些病例。
+没有预建索引时，在准备好依赖、权重和图像的检索环境运行：
 
 ```bash
 python 02_代码/tools/build_multimodal_index.py
-python 02_代码/run_demo.py --port 8765
 ```
 
-索引输出到 `04_产物/multimodal`。检查 `/api/multimodal`：需确认 `ready=true`、`model_loaded=true`、索引图片数符合准备范围。若有失败文件，先核对索引 manifest，不把部分成功当作全部准备完成。
+也可以在完整环境启动后，使用其Docker Compose相同项目与env参数，在yanwei-retrieval容器中执行 `/app/02_代码/tools/build_multimodal_index.py`；索引写入共享04_产物目录。检查manifest的图片数、failures、模型版本和实际图文查询是否used=true。不要仅凭HTTP200或ready字段认定模型已执行。
 
-## 本地数据
+## 轻量工程验证
 
-上传文件、对话、反馈、证据与轨迹保存在 `04_产物`，不进入 Git。公开示例来源为 IDRiD；仓库不含私人患者信息、生产账号或 API Key。使用自己的图片前请自行完成授权与去标识处理。
+Python 3.11/3.12安装根目录requirements-demo.txt即可运行文字基线和不依赖真实模型的工程检查。缺原图不显示候选影像，缺模型不假装图文成功。
+
+## 平台与授权
+
+回到根目录运行START.cmd或sh start.sh，由本机管理员完成Nexent账号和模型服务首次设置。团队共用站点时仅团队配置；各自本地开发则需独立授权配置。配置和运行数据不进入Git。
