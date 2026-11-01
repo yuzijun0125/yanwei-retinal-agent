@@ -1,6 +1,12 @@
 # 验证记录
 
-## 最新源码复测：2026-10-20
+## 最新源码复测：2026-11-01
+
+本次在Windows现有Python环境：后端40项、网关/托管/复核36项、独立知识图谱15项测试全部通过；4条黄金业务回归通过；workspace.js通过node --check。合计91项unittest和4条业务回归。图谱测试需先执行python build_graph.py --source inputs重建本地数据库，该数据库不进入Git。
+
+本次没有执行新机器Docker全栈冷启动或用户Edge原生文件弹窗人工验收。GitHub远程CI状态以Actions为准。
+
+## 历史源码复测：2026-10-20
 
 最新仓库工作树在Windows的已有Python环境执行：后端40项、网关/访客/授权27项unittest通过，4条黄金业务回归通过。未使用本机模型、原始图片、Nexent账号或服务Key作为这些测试的输入；部分上游使用fixture，不能代替真实平台验收。
 

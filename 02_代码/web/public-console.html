@@ -597,7 +597,7 @@
       </header>
       <section id="messagesScroll" class="messages-scroll flex-1" aria-label="对话内容">
         <div class="messages-inner">
-          <div id="emptyState" class="empty-state">
+          <details id="modalityOverview" style="margin:16px 0;padding:16px;border:1px solid #366270;border-radius:12px;background:#122934;color:#d9eeeb" open><summary style="cursor:pointer;font-weight:600">系统支持哪些资料？</summary><div id="modalityCards"></div><p style="font-size:12px;color:#a6bfc6">眼底彩照：参考库图像检索；病历截图：先识别文字、人工核对后检索。暂未接入OCT、造影及超广角影像参考库。文件格式相同不代表医学模态相同。</p><button type="button" id="openClinicalWorkspace">打开资料对照与医生复核窗口</button></details><div id="emptyState" class="empty-state">
             <div class="orb-wrap" aria-hidden="true">
               <div class="orb-glow"></div><div class="orb-ring"></div><div class="orb-ring second"></div>
               <div class="orb-core">
@@ -1259,6 +1259,7 @@
       caveats: Array.isArray(actionObject.caveats) ? actionObject.caveats.slice(0, 20) : (evidence?.caveats || []),
       qc: actionObject.qc && typeof actionObject.qc === 'object' ? actionObject.qc : null,
       multimodal: actionObject.multimodal && typeof actionObject.multimodal === 'object' ? actionObject.multimodal : null,
+      reviewedContext: actionObject.reviewed_context || null,
       traceId: cleanText(actionObject.trace_id || (evidence?.provenance && evidence.provenance.trace_id)),
       elapsedMs: Number(actionObject.elapsed_ms),
       inferred: false
@@ -2586,6 +2587,9 @@
     const conversation = getActiveConversation();
     const assistant = getLatestAssistantMessage(conversation);
     const result = assistant && assistant.result;
+    const reviewInput=conversation?.messages?.filter(m=>m.role==='user').slice(-1)[0];
+    window.__yanweiReview={result,attachment:reviewInput?.attachment||null,inputText:reviewInput?.content||''};
+    window.dispatchEvent(new CustomEvent('yanwei:result',{detail:window.__yanweiReview}));
     if (!result) {
       els.decisionEmpty.hidden = false;
       els.decisionContent.hidden = true;
@@ -2715,8 +2719,11 @@
       els.decisionContent.appendChild(nextSection);
     }
 
+    const advancedReview = el('button','doctor-option','资料对照 / 逐项复核 / 历史记录');
+    advancedReview.type='button';advancedReview.onclick=()=>window.dispatchEvent(new Event('yanwei:open-review'));
+    els.decisionContent.appendChild(advancedReview);
     const reviewSection = el('section', 'decision-section');
-    reviewSection.appendChild(el('div', 'decision-section-title', '医生复核反馈'));
+    reviewSection.appendChild(el('div', 'decision-section-title', '普通反馈（不代表医生审核）'));
     const reviewCard = el('div', 'decision-card');
     const topCandidate = result.candidates[0];
     const caseId = topCandidate ? (topCandidate.source.caseId || topCandidate.regionId) : '';
@@ -2807,7 +2814,7 @@
       saveStore();
       renderSidebar();
       renderDecisionPanel();
-      showToast(assistant.feedback.duplicate ? '反馈已存在，未重复写入' : '医生反馈已记录');
+      showToast(assistant.feedback.duplicate ? '反馈已存在，未重复写入' : '普通反馈已记录');
     } catch (error) {
       openModal({
         type: 'error',
@@ -3054,5 +3061,6 @@
 })();
 </script>
 
+<script src="/static/clinical-workspace.js"></script>
 </body>
 </html>

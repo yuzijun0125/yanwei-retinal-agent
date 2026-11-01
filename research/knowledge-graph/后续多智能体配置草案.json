@@ -1,0 +1,22 @@
+{
+  "status": "CONFIGURATION_DRAFT_NOT_EXECUTED",
+  "llm_calls_in_this_delivery": 0,
+  "roles": [
+    {
+      "name": "entity_extractor",
+      "task": "只从提供原文识别白名单实体；附原文位置和否定/疑似标记，不补充常识"
+    },
+    {
+      "name": "relation_extractor",
+      "task": "仅在已识别实体之间提议允许关系，给出逐条原文证据，不把否定变成阳性"
+    },
+    {
+      "name": "source_conflict_reviewer",
+      "task": "识别同义重复、类型和来源冲突；结构化字段也需区分官方与项目推导；不足则待复核"
+    },
+    {
+      "name": "postprocessor",
+      "task": "用确定性脚本核对类型、范围、来源和重复，输出候选与复核清单；不自动宣称专家通过"
+    }
+  ]
+}

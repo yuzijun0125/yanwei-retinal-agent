@@ -23,4 +23,9 @@ jobs:
         run: python tests/run_golden.py
       - name: Gateway and visitor isolation
         working-directory: integration
-        run: python -m unittest test_integration test_public test_hosting
+        run: python -m unittest test_integration test_public test_hosting test_clinical_review
+      - name: Knowledge graph baseline contracts
+        working-directory: research/knowledge-graph
+        run: |
+          python build_graph.py --source inputs
+          python -m unittest test_graph

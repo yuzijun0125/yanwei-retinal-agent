@@ -1,4 +1,5 @@
 """Visitor-only Nexent gateway; administrator credentials never reach visitors."""
+from pathlib import Path
 import argparse
 from contextlib import closing
 from collections import defaultdict, deque
@@ -7,6 +8,7 @@ import json, re, sqlite3, threading, time, uuid, os
 from urllib.parse import urlsplit, parse_qs
 import gateway
 import hosting
+import clinical_review
 import sys
 sys.path.insert(0,str(gateway.ROOT/'02_代码'))
 from yanwei import request_scope
@@ -43,7 +45,8 @@ class Handler(gateway.Handler):
         self.close_connection=True
         super().send_header('Connection','close')
         if getattr(self,'new_session',False):
-            super().send_header('Set-Cookie','yanwei_visitor='+self.sid+'; HttpOnly; SameSite=Strict; Path=/; Max-Age=86400'+('; Secure' if __import__('os').environ.get('PUBLIC_HTTPS')=='1' else ''))
+            max_age=34560000 if getattr(self,'permanent_review',False) else 86400
+            super().send_header('Set-Cookie','yanwei_visitor='+self.sid+'; HttpOnly; SameSite=Strict; Path=/; Max-Age='+str(max_age)+('; Secure' if __import__('os').environ.get('PUBLIC_HTTPS')=='1' else ''))
             self.new_session=False
         super().send_header('X-Content-Type-Options','nosniff')
         super().send_header('X-Frame-Options','DENY')
@@ -104,6 +107,7 @@ class Handler(gateway.Handler):
         if asset and not owned(self.sid,'asset',asset):
             raise ValueError('本轮图片不属于当前访客会话')
         self.verified_result=True
+        clinical_review.remember(gateway.STATE,self.sid,result)
         self.flush_answers()
         evidence=result.get('evidence') or {}
         for kind,value in [('evidence',evidence.get('evidence_id')),('trace',result.get('trace_id'))]:
@@ -130,8 +134,11 @@ class Handler(gateway.Handler):
         except Exception:pass
         sid=cookie.get('yanwei_visitor')
         sid=sid.value if sid else ''
-        if not re.fullmatch('[a-f0-9]{32}',sid) or not sql('SELECT sid FROM sessions WHERE sid=? AND at>?',(sid,time.time()-86400),True):
+        valid_sid=bool(re.fullmatch('[a-f0-9]{32}',sid))
+        self.permanent_review=valid_sid and clinical_review.permanent(gateway.STATE,sid)
+        if not valid_sid or (not self.permanent_review and not sql('SELECT sid FROM sessions WHERE sid=? AND at>?',(sid,time.time()-86400),True)):
             sid=uuid.uuid4().hex;sql('INSERT INTO sessions VALUES (?,?)',(sid,time.time()));self.new_session=True
+        if self.permanent_review:self.new_session=True
         self.sid=sid
 
     def dispatch(self):
@@ -148,7 +155,28 @@ class Handler(gateway.Handler):
                 origin=self.headers.get('Origin')
                 if origin and urlsplit(origin).netloc!=self.headers.get('Host'):return self.json({'error':{'message':'请从眼维页面提交'}},403)
             self.session()
-            if path in {'/','/console'} and self.command=='GET':return self.file(gateway.WEB/'public-console.html')
+            if path in {'/','/console','/doctor'} and self.command=='GET':return self.file(gateway.WEB/'workspace.html')
+            if path in {'/static/workspace.js','/static/workspace.css'} and self.command=='GET':return self.file(gateway.WEB/path.split('/')[-1])
+            if path=='/static/clinical-workspace.js' and self.command=='GET':return self.file(gateway.WEB/'clinical-workspace.js')
+            if path in {'/api/reviews','/api/review/legacy'} and self.command=='GET':
+                filters={k:v[0] for k,v in parse_qs(urlsplit(self.path).query).items()}
+                if path.endswith('/legacy'):
+                    legacy=Path(os.environ.get('YANWEI_LEGACY_FEEDBACK',str(gateway.ROOT/'04_产物/反馈/feedback.jsonl')))
+                    return self.json(clinical_review.legacy_history(gateway.STATE,self.sid,legacy,filters))
+                return self.json(clinical_review.history(gateway.STATE,self.sid,filters))
+            if path in {'/api/review/login','/api/reviews'} and self.command=='POST':
+                value=json.loads(raw_body)
+                if not isinstance(value,dict):raise ValueError('提交内容格式不正确')
+                if path=='/api/review/login':
+                    with _LOCK:
+                        attempts=_RATE['review:'+self.sid]
+                        while attempts and attempts[0]<time.time()-60:attempts.popleft()
+                        if len(attempts)>=5:return self.json({'error':{'message':'尝试过于频繁，请一分钟后再试'}},429)
+                        attempts.append(time.time())
+                    account=clinical_review.login(gateway.STATE,self.sid,value.get('code'))
+                    self.permanent_review=True;self.new_session=True
+                    return self.json(account)
+                return self.json(clinical_review.save(gateway.STATE,self.sid,value))
             if path=='/static/tailwindcss-3.4.17.js' and self.command=='GET':return self.file(gateway.WEB/'tailwindcss-3.4.17.js')
             if path=='/api/integration/status' and self.command=='GET':
                 return self.json({'ok':True,'hosted':True,'configured':bool(hosting.settings().get('api_key')),'agent':{'agent_id':1,'version_no':1}})
@@ -186,6 +214,8 @@ class Handler(gateway.Handler):
                 value['idempotency_key']=self.sid+':'+str(value.get('idempotency_key',''))[:300]
                 return self.json(gateway.upstream_json(gateway.RETRIEVAL,path,'POST',value))
             return self.run_visitor(value)
+        except PermissionError as exc:
+            return self.json({'error':{'message':str(exc)}},403)
         except ValueError as exc:
             if self.response_started:
                 self.close_connection=True

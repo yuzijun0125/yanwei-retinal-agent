@@ -1,0 +1,1110 @@
+{
+  "黄斑区出血参考病例": {
+    "status": "REFERENCE_RECORDS",
+    "count": 63,
+    "candidates": [
+      {
+        "case_id": "CASE_IDRiD_000001",
+        "image_id": "IMG_IDRiD_000001",
+        "region_id": "REG_IDRiD_001_HE",
+        "path": [
+          {
+            "id": "99ec22a903a30643e833a2f9",
+            "source": "CASE_IDRiD_000001",
+            "target": "IMG_IDRiD_000001",
+            "relation": "HAS_IMAGE",
+            "label": "关联影像",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_image.csv",
+                "locator": "silver_image.csv:CSV行29",
+                "record_hash": "df2f8e9eabc3fcb9d32699f637dc21835225a802cdd410a4804659470eaf935b",
+                "file_sha256": "0458fdd8c979863457c36dfbb6519a3eb9a2f328782936af14f90057da12dbaa",
+                "excerpt": "IMG_IDRiD_000001 → CASE_IDRiD_000001",
+                "official_source": "OA-1:IDRiD_001.jpg",
+                "transform": "官方原图 -> 本地路径/元数据；sha256 为本地文件哈希(非官方)；split 映射官方 Training 集",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "b7e5f562e5fcaaee5497440d",
+            "source": "IMG_IDRiD_000001",
+            "target": "REG_IDRiD_001_HE",
+            "relation": "HAS_REGION",
+            "label": "含参考标注区域",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行98",
+                "record_hash": "017acc8929d6038a0894487e9c400d26e193bffab714b50f8b50cae3184e107a",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "image_id=IMG_IDRiD_000001; region_id=REG_IDRiD_001_HE",
+                "official_source": "OA-2:IDRiD_001_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "5df26b25cd607da8886c55d8",
+            "source": "REG_IDRiD_001_HE",
+            "target": "lesion:HE",
+            "relation": "ANNOTATED_AS",
+            "label": "已有标注类型",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行98",
+                "record_hash": "017acc8929d6038a0894487e9c400d26e193bffab714b50f8b50cae3184e107a",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "lesion_type=HE",
+                "official_source": "OA-2:IDRiD_001_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "MASK_DERIVED_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "e6ca1bd328c311925dfc7439",
+            "source": "REG_IDRiD_001_HE",
+            "target": "anatomy:MACULA",
+            "relation": "PROJECT_LOCATION",
+            "label": "项目推导位置",
+            "status": "REVIEW_REQUIRED",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行98",
+                "record_hash": "017acc8929d6038a0894487e9c400d26e193bffab714b50f8b50cae3184e107a",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+                "official_source": "OA-2:IDRiD_001_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          }
+        ],
+        "review_required": true
+      },
+      {
+        "case_id": "CASE_IDRiD_000003",
+        "image_id": "IMG_IDRiD_000003",
+        "region_id": "REG_IDRiD_003_HE",
+        "path": [
+          {
+            "id": "32046365f398795983bf7cd4",
+            "source": "CASE_IDRiD_000003",
+            "target": "IMG_IDRiD_000003",
+            "relation": "HAS_IMAGE",
+            "label": "关联影像",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_image.csv",
+                "locator": "silver_image.csv:CSV行31",
+                "record_hash": "7e280ac486ae434a8dc1a588c80eb62bdc04884af68ec9a5ba31a2484c38aa9f",
+                "file_sha256": "0458fdd8c979863457c36dfbb6519a3eb9a2f328782936af14f90057da12dbaa",
+                "excerpt": "IMG_IDRiD_000003 → CASE_IDRiD_000003",
+                "official_source": "OA-1:IDRiD_003.jpg",
+                "transform": "官方原图 -> 本地路径/元数据；sha256 为本地文件哈希(非官方)；split 映射官方 Training 集",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "15b38aad4b5e0c73d23e599a",
+            "source": "IMG_IDRiD_000003",
+            "target": "REG_IDRiD_003_HE",
+            "relation": "HAS_REGION",
+            "label": "含参考标注区域",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行104",
+                "record_hash": "2d27d54c2a9d0995a298b439562c8bd22d20b3c4237967767579bcc1ba497276",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "image_id=IMG_IDRiD_000003; region_id=REG_IDRiD_003_HE",
+                "official_source": "OA-2:IDRiD_003_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "3060e50f552105b3e048a4a0",
+            "source": "REG_IDRiD_003_HE",
+            "target": "lesion:HE",
+            "relation": "ANNOTATED_AS",
+            "label": "已有标注类型",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行104",
+                "record_hash": "2d27d54c2a9d0995a298b439562c8bd22d20b3c4237967767579bcc1ba497276",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "lesion_type=HE",
+                "official_source": "OA-2:IDRiD_003_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "MASK_DERIVED_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "460af82db57cfef1af1246e0",
+            "source": "REG_IDRiD_003_HE",
+            "target": "anatomy:MACULA",
+            "relation": "PROJECT_LOCATION",
+            "label": "项目推导位置",
+            "status": "REVIEW_REQUIRED",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行104",
+                "record_hash": "2d27d54c2a9d0995a298b439562c8bd22d20b3c4237967767579bcc1ba497276",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+                "official_source": "OA-2:IDRiD_003_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          }
+        ],
+        "review_required": true
+      },
+      {
+        "case_id": "CASE_IDRiD_000004",
+        "image_id": "IMG_IDRiD_000004",
+        "region_id": "REG_IDRiD_004_HE",
+        "path": [
+          {
+            "id": "b17c06a8c430a2ddff11e710",
+            "source": "CASE_IDRiD_000004",
+            "target": "IMG_IDRiD_000004",
+            "relation": "HAS_IMAGE",
+            "label": "关联影像",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_image.csv",
+                "locator": "silver_image.csv:CSV行32",
+                "record_hash": "f7443f3b87df2e342374241b65a55ce1b38c1e4830046d595fafd2cf3f0d16e2",
+                "file_sha256": "0458fdd8c979863457c36dfbb6519a3eb9a2f328782936af14f90057da12dbaa",
+                "excerpt": "IMG_IDRiD_000004 → CASE_IDRiD_000004",
+                "official_source": "OA-1:IDRiD_004.jpg",
+                "transform": "官方原图 -> 本地路径/元数据；sha256 为本地文件哈希(非官方)；split 映射官方 Training 集",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "717ac89ad048ae48d2bc23f0",
+            "source": "IMG_IDRiD_000004",
+            "target": "REG_IDRiD_004_HE",
+            "relation": "HAS_REGION",
+            "label": "含参考标注区域",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行108",
+                "record_hash": "383ee1cde7e6fdb7fda63859f18920f361fbbe762d5be82bc5015fd1a27a07c3",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "image_id=IMG_IDRiD_000004; region_id=REG_IDRiD_004_HE",
+                "official_source": "OA-2:IDRiD_004_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "0a8f8a35ebc7d4a131a0d2ea",
+            "source": "REG_IDRiD_004_HE",
+            "target": "lesion:HE",
+            "relation": "ANNOTATED_AS",
+            "label": "已有标注类型",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行108",
+                "record_hash": "383ee1cde7e6fdb7fda63859f18920f361fbbe762d5be82bc5015fd1a27a07c3",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "lesion_type=HE",
+                "official_source": "OA-2:IDRiD_004_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "MASK_DERIVED_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "edc19a9ae0435d7175ec004a",
+            "source": "REG_IDRiD_004_HE",
+            "target": "anatomy:MACULA",
+            "relation": "PROJECT_LOCATION",
+            "label": "项目推导位置",
+            "status": "REVIEW_REQUIRED",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行108",
+                "record_hash": "383ee1cde7e6fdb7fda63859f18920f361fbbe762d5be82bc5015fd1a27a07c3",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+                "official_source": "OA-2:IDRiD_004_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          }
+        ],
+        "review_required": true
+      },
+      {
+        "case_id": "CASE_IDRiD_000006",
+        "image_id": "IMG_IDRiD_000006",
+        "region_id": "REG_IDRiD_006_HE",
+        "path": [
+          {
+            "id": "1bf15bd60579813e9ef58b18",
+            "source": "CASE_IDRiD_000006",
+            "target": "IMG_IDRiD_000006",
+            "relation": "HAS_IMAGE",
+            "label": "关联影像",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_image.csv",
+                "locator": "silver_image.csv:CSV行34",
+                "record_hash": "f96b35bd0d8fd71f1dd2fd87bf6e42fcc1f1fd9b46a03b1905515b71766287f6",
+                "file_sha256": "0458fdd8c979863457c36dfbb6519a3eb9a2f328782936af14f90057da12dbaa",
+                "excerpt": "IMG_IDRiD_000006 → CASE_IDRiD_000006",
+                "official_source": "OA-1:IDRiD_006.jpg",
+                "transform": "官方原图 -> 本地路径/元数据；sha256 为本地文件哈希(非官方)；split 映射官方 Training 集",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "70d93a8db4e59084c52923cb",
+            "source": "IMG_IDRiD_000006",
+            "target": "REG_IDRiD_006_HE",
+            "relation": "HAS_REGION",
+            "label": "含参考标注区域",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行114",
+                "record_hash": "318f8e170f13c7ff50134120d15609d5848f53f10534d75eaf9dc5f102203873",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "image_id=IMG_IDRiD_000006; region_id=REG_IDRiD_006_HE",
+                "official_source": "OA-2:IDRiD_006_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "3bcf177ba8367bf9ee2be7e9",
+            "source": "REG_IDRiD_006_HE",
+            "target": "lesion:HE",
+            "relation": "ANNOTATED_AS",
+            "label": "已有标注类型",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行114",
+                "record_hash": "318f8e170f13c7ff50134120d15609d5848f53f10534d75eaf9dc5f102203873",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "lesion_type=HE",
+                "official_source": "OA-2:IDRiD_006_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "MASK_DERIVED_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "9c99dcc41de61ff90ee57159",
+            "source": "REG_IDRiD_006_HE",
+            "target": "anatomy:MACULA",
+            "relation": "PROJECT_LOCATION",
+            "label": "项目推导位置",
+            "status": "REVIEW_REQUIRED",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行114",
+                "record_hash": "318f8e170f13c7ff50134120d15609d5848f53f10534d75eaf9dc5f102203873",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+                "official_source": "OA-2:IDRiD_006_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          }
+        ],
+        "review_required": true
+      },
+      {
+        "case_id": "CASE_IDRiD_000007",
+        "image_id": "IMG_IDRiD_000007",
+        "region_id": "REG_IDRiD_007_HE",
+        "path": [
+          {
+            "id": "f5e10e72ab5a8302b1ffc63e",
+            "source": "CASE_IDRiD_000007",
+            "target": "IMG_IDRiD_000007",
+            "relation": "HAS_IMAGE",
+            "label": "关联影像",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_image.csv",
+                "locator": "silver_image.csv:CSV行35",
+                "record_hash": "573ad5bd7f0b0ad0102578e14996558b9b2e58299d0f8cd32d4b0c2c2b0e2315",
+                "file_sha256": "0458fdd8c979863457c36dfbb6519a3eb9a2f328782936af14f90057da12dbaa",
+                "excerpt": "IMG_IDRiD_000007 → CASE_IDRiD_000007",
+                "official_source": "OA-1:IDRiD_007.jpg",
+                "transform": "官方原图 -> 本地路径/元数据；sha256 为本地文件哈希(非官方)；split 映射官方 Training 集",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "04eb14df9fdf8c93bf029edd",
+            "source": "IMG_IDRiD_000007",
+            "target": "REG_IDRiD_007_HE",
+            "relation": "HAS_REGION",
+            "label": "含参考标注区域",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行117",
+                "record_hash": "e87312c7066b280d708bd98d10f82dd6a1006ff1e507280c381d918284cdca84",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "image_id=IMG_IDRiD_000007; region_id=REG_IDRiD_007_HE",
+                "official_source": "OA-2:IDRiD_007_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "110ac84689369f7f2dc80127",
+            "source": "REG_IDRiD_007_HE",
+            "target": "anatomy:MACULA",
+            "relation": "PROJECT_LOCATION",
+            "label": "项目推导位置",
+            "status": "REVIEW_REQUIRED",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行117",
+                "record_hash": "e87312c7066b280d708bd98d10f82dd6a1006ff1e507280c381d918284cdca84",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+                "official_source": "OA-2:IDRiD_007_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "PROJECT_METADATA"
+              }
+            ]
+          },
+          {
+            "id": "923286bb0e73986bef1e67e6",
+            "source": "REG_IDRiD_007_HE",
+            "target": "lesion:HE",
+            "relation": "ANNOTATED_AS",
+            "label": "已有标注类型",
+            "status": "IMPORTED_PENDING",
+            "evidence": [
+              {
+                "document": "silver_region.csv",
+                "locator": "silver_region.csv:CSV行117",
+                "record_hash": "e87312c7066b280d708bd98d10f82dd6a1006ff1e507280c381d918284cdca84",
+                "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+                "excerpt": "lesion_type=HE",
+                "official_source": "OA-2:IDRiD_007_HE.tif",
+                "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+                "original_review_status": "PENDING",
+                "kind": "MASK_DERIVED_METADATA"
+              }
+            ]
+          }
+        ],
+        "review_required": true
+      }
+    ],
+    "answer": "结果来自参考库已有标注；位置为项目推导、待复核，不能据此诊断新图片。"
+  },
+  "CASE_IDRiD_000055": {
+    "status": "RECORD_TRACE",
+    "case_id": "CASE_IDRiD_000055",
+    "answer": "返回该项目病例记录的影像、区域和字段来源；不代表新增诊断。",
+    "paths": [
+      {
+        "id": "36ee94dc1bc6ddff30cf35d4",
+        "source": "CASE_IDRiD_000055",
+        "target": "TXT_IDRiD_REGION_0004",
+        "relation": "HAS_TEXT",
+        "label": "关联文本记录",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_text.csv",
+            "locator": "silver_text.csv:CSV行86",
+            "record_hash": "be3806cff4a9df26b3e2782e0333665a30c9075dd73ae6219180777762a6dbf6",
+            "file_sha256": "97c0748c5921ea972f63a7846f1832862e34f4684cdf85da3545f404ecc4d109",
+            "excerpt": "[合成] 眼底病灶区域：棉絮斑；眼别：右眼；位置：黄斑区；程度草案：少量。",
+            "official_source": "NONE",
+            "transform": "文本由该图像/区域自身掩膜规则生成（官方不提供文本，含循环论证风险）",
+            "original_review_status": "PENDING",
+            "kind": "SYNTHETIC"
+          }
+        ]
+      },
+      {
+        "id": "51870731b5fb10c683d133a7",
+        "source": "CASE_IDRiD_000055",
+        "target": "TXT_IDRiD_REGION_0002",
+        "relation": "HAS_TEXT",
+        "label": "关联文本记录",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_text.csv",
+            "locator": "silver_text.csv:CSV行84",
+            "record_hash": "9d7d963701b2937ef2ec7ac1827fbd1b3b8faaa28de65d0f69a6990d41efeeda",
+            "file_sha256": "97c0748c5921ea972f63a7846f1832862e34f4684cdf85da3545f404ecc4d109",
+            "excerpt": "[合成] 眼底病灶区域：出血；眼别：右眼；位置：黄斑区；程度草案：中度。",
+            "official_source": "NONE",
+            "transform": "文本由该图像/区域自身掩膜规则生成（官方不提供文本，含循环论证风险）",
+            "original_review_status": "PENDING",
+            "kind": "SYNTHETIC"
+          }
+        ]
+      },
+      {
+        "id": "5b2b91fbe0857e08d94a672a",
+        "source": "CASE_IDRiD_000055",
+        "target": "IMG_IDRiD_000055",
+        "relation": "HAS_IMAGE",
+        "label": "关联影像",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_image.csv",
+            "locator": "silver_image.csv:CSV行2",
+            "record_hash": "5e7363a60ceac35160a896445fd4c764ba0d996c8535590c105dc3bbadfb33bc",
+            "file_sha256": "0458fdd8c979863457c36dfbb6519a3eb9a2f328782936af14f90057da12dbaa",
+            "excerpt": "IMG_IDRiD_000055 → CASE_IDRiD_000055",
+            "official_source": "OA-1:IDRiD_055.jpg",
+            "transform": "官方原图 -> 本地路径/元数据；sha256 为本地文件哈希(非官方)；split 映射官方 Testing 集",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "7a695c537573027251f4523b",
+        "source": "CASE_IDRiD_000055",
+        "target": "TXT_IDRiD_055",
+        "relation": "HAS_TEXT",
+        "label": "关联文本记录",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_text.csv",
+            "locator": "silver_text.csv:CSV行2",
+            "record_hash": "458b394265f944bef0976e47635ae63439bbfb467b4f94c945ee5e938a264423",
+            "file_sha256": "97c0748c5921ea972f63a7846f1832862e34f4684cdf85da3545f404ecc4d109",
+            "excerpt": "[合成] 眼底彩色图像，右眼。检出病灶：微血管瘤（黄斑区，散在）、出血（黄斑区，中度）、硬性渗出（黄斑区，较重）、棉絮斑（黄斑区，少量）。",
+            "official_source": "NONE",
+            "transform": "文本由该图像/区域自身掩膜规则生成（官方不提供文本，含循环论证风险）",
+            "original_review_status": "PENDING",
+            "kind": "SYNTHETIC"
+          }
+        ]
+      },
+      {
+        "id": "e6e7c28ef2ed100d6e38b683",
+        "source": "CASE_IDRiD_000055",
+        "target": "TXT_IDRiD_REGION_0001",
+        "relation": "HAS_TEXT",
+        "label": "关联文本记录",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_text.csv",
+            "locator": "silver_text.csv:CSV行83",
+            "record_hash": "f1b9be00bbb81ad2ac1021dad144d4f1b4698c4efa64ae7c53432df714904eaa",
+            "file_sha256": "97c0748c5921ea972f63a7846f1832862e34f4684cdf85da3545f404ecc4d109",
+            "excerpt": "[合成] 眼底病灶区域：微血管瘤；眼别：右眼；位置：黄斑区；程度草案：散在。",
+            "official_source": "NONE",
+            "transform": "文本由该图像/区域自身掩膜规则生成（官方不提供文本，含循环论证风险）",
+            "original_review_status": "PENDING",
+            "kind": "SYNTHETIC"
+          }
+        ]
+      },
+      {
+        "id": "e9300c9f30d2661323923639",
+        "source": "CASE_IDRiD_000055",
+        "target": "TXT_IDRiD_REGION_0003",
+        "relation": "HAS_TEXT",
+        "label": "关联文本记录",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_text.csv",
+            "locator": "silver_text.csv:CSV行85",
+            "record_hash": "30e833afd58797f7d1d47d3e103fa63e7133deed858d73039ef2cdf2492dd873",
+            "file_sha256": "97c0748c5921ea972f63a7846f1832862e34f4684cdf85da3545f404ecc4d109",
+            "excerpt": "[合成] 眼底病灶区域：硬性渗出；眼别：右眼；位置：黄斑区；程度草案：较重。",
+            "official_source": "NONE",
+            "transform": "文本由该图像/区域自身掩膜规则生成（官方不提供文本，含循环论证风险）",
+            "original_review_status": "PENDING",
+            "kind": "SYNTHETIC"
+          }
+        ]
+      },
+      {
+        "id": "37b60a1741b6cadab1dc5d75",
+        "source": "IMG_IDRiD_000055",
+        "target": "modality:CFP",
+        "relation": "MODALITY",
+        "label": "影像模态",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_image.csv",
+            "locator": "silver_image.csv:CSV行2",
+            "record_hash": "5e7363a60ceac35160a896445fd4c764ba0d996c8535590c105dc3bbadfb33bc",
+            "file_sha256": "0458fdd8c979863457c36dfbb6519a3eb9a2f328782936af14f90057da12dbaa",
+            "excerpt": "modality=CFP",
+            "official_source": "OA-1:IDRiD_055.jpg",
+            "transform": "官方原图 -> 本地路径/元数据；sha256 为本地文件哈希(非官方)；split 映射官方 Testing 集",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "4f01eb94e6685d330614c2b0",
+        "source": "IMG_IDRiD_000055",
+        "target": "REG_IDRiD_055_HE",
+        "relation": "HAS_REGION",
+        "label": "含参考标注区域",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行3",
+            "record_hash": "929e557f6c8c385dfa2e67ac29ad95a7b17382647df4935a4a1fe8382c18afc8",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "image_id=IMG_IDRiD_000055; region_id=REG_IDRiD_055_HE",
+            "official_source": "OA-2:IDRiD_055_HE.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "853ada9fda23aabff38dbb8d",
+        "source": "IMG_IDRiD_000055",
+        "target": "REG_IDRiD_055_SE",
+        "relation": "HAS_REGION",
+        "label": "含参考标注区域",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行5",
+            "record_hash": "0260e81962a41b7e915bad247a625c9f3fc39ea291a5ef93e26888dc5e88317d",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "image_id=IMG_IDRiD_000055; region_id=REG_IDRiD_055_SE",
+            "official_source": "OA-2:IDRiD_055_SE.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "8fded24d067575a01c3ebd20",
+        "source": "IMG_IDRiD_000055",
+        "target": "eye:OD",
+        "relation": "PROJECT_EYE",
+        "label": "项目推导眼别",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_image.csv",
+            "locator": "silver_image.csv:CSV行2",
+            "record_hash": "5e7363a60ceac35160a896445fd4c764ba0d996c8535590c105dc3bbadfb33bc",
+            "file_sha256": "0458fdd8c979863457c36dfbb6519a3eb9a2f328782936af14f90057da12dbaa",
+            "excerpt": "eye=OD; eye_source=DERIVED_OD_FOVEA",
+            "official_source": "OA-1:IDRiD_055.jpg",
+            "transform": "官方原图 -> 本地路径/元数据；sha256 为本地文件哈希(非官方)；split 映射官方 Testing 集",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "b1622d891f8dd0f648b8945d",
+        "source": "IMG_IDRiD_000055",
+        "target": "REG_IDRiD_055_EX",
+        "relation": "HAS_REGION",
+        "label": "含参考标注区域",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行4",
+            "record_hash": "bddb635ebbcb4778594caedb65534f910f3112f3c157d07d8c20ba9dc8f82c9e",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "image_id=IMG_IDRiD_000055; region_id=REG_IDRiD_055_EX",
+            "official_source": "OA-2:IDRiD_055_EX.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "ca9bde1fe56550ffd22d8899",
+        "source": "IMG_IDRiD_000055",
+        "target": "REG_IDRiD_055_MA",
+        "relation": "HAS_REGION",
+        "label": "含参考标注区域",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行2",
+            "record_hash": "444da31409916935396cf7319a77c63e62d642c5582f27892cae82ea7c8a7366",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "image_id=IMG_IDRiD_000055; region_id=REG_IDRiD_055_MA",
+            "official_source": "OA-2:IDRiD_055_MA.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "0c69392dec0d2da85935b09e",
+        "source": "REG_IDRiD_055_HE",
+        "target": "lesion:HE",
+        "relation": "ANNOTATED_AS",
+        "label": "已有标注类型",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行3",
+            "record_hash": "929e557f6c8c385dfa2e67ac29ad95a7b17382647df4935a4a1fe8382c18afc8",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "lesion_type=HE",
+            "official_source": "OA-2:IDRiD_055_HE.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "MASK_DERIVED_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "2e634260dcc871b3c89e507d",
+        "source": "REG_IDRiD_055_SE",
+        "target": "lesion:SE",
+        "relation": "ANNOTATED_AS",
+        "label": "已有标注类型",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行5",
+            "record_hash": "0260e81962a41b7e915bad247a625c9f3fc39ea291a5ef93e26888dc5e88317d",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "lesion_type=SE",
+            "official_source": "OA-2:IDRiD_055_SE.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "MASK_DERIVED_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "4eb35ad08b6c6875843b73da",
+        "source": "REG_IDRiD_055_SE",
+        "target": "severity:FEW",
+        "relation": "PROJECT_SEVERITY",
+        "label": "项目程度草案",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_lesion.csv",
+            "locator": "silver_lesion.csv:CSV行5",
+            "record_hash": "30aac98e3f905db1ed17b731544368c7db00378e53fe3c37ad06364f5eb5ed76",
+            "file_sha256": "54d9a5c3f842483adba83712c20093d8da53ea9e059998ee39542d6749352676",
+            "excerpt": "severity=FEW; severity_source=DERIVED_AREA",
+            "official_source": "OA-2:IDRiD_055_SE.tif",
+            "transform": "官方病灶掩膜（lesion_type/area 与 region 同源；severity/location 为项目规则派生）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "57a9fabfa41139e35e6792f5",
+        "source": "REG_IDRiD_055_MA",
+        "target": "anatomy:MACULA",
+        "relation": "PROJECT_LOCATION",
+        "label": "项目推导位置",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行2",
+            "record_hash": "444da31409916935396cf7319a77c63e62d642c5582f27892cae82ea7c8a7366",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+            "official_source": "OA-2:IDRiD_055_MA.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "612bea2956fe0033781f7176",
+        "source": "REG_IDRiD_055_EX",
+        "target": "anatomy:MACULA",
+        "relation": "PROJECT_LOCATION",
+        "label": "项目推导位置",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行4",
+            "record_hash": "bddb635ebbcb4778594caedb65534f910f3112f3c157d07d8c20ba9dc8f82c9e",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+            "official_source": "OA-2:IDRiD_055_EX.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "7e49aecd55ac41a36e311e40",
+        "source": "REG_IDRiD_055_EX",
+        "target": "severity:MARKED",
+        "relation": "PROJECT_SEVERITY",
+        "label": "项目程度草案",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_lesion.csv",
+            "locator": "silver_lesion.csv:CSV行4",
+            "record_hash": "70bed288eb71e06c9cb49001ddf4b23b98e06c6f52de2a3aca130587cfa8d334",
+            "file_sha256": "54d9a5c3f842483adba83712c20093d8da53ea9e059998ee39542d6749352676",
+            "excerpt": "severity=MARKED; severity_source=DERIVED_AREA",
+            "official_source": "OA-2:IDRiD_055_EX.tif",
+            "transform": "官方病灶掩膜（lesion_type/area 与 region 同源；severity/location 为项目规则派生）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "8602288237b974b6b3344353",
+        "source": "REG_IDRiD_055_EX",
+        "target": "lesion:EX",
+        "relation": "ANNOTATED_AS",
+        "label": "已有标注类型",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行4",
+            "record_hash": "bddb635ebbcb4778594caedb65534f910f3112f3c157d07d8c20ba9dc8f82c9e",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "lesion_type=EX",
+            "official_source": "OA-2:IDRiD_055_EX.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "MASK_DERIVED_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "8935a10bc3f948abfe022e2e",
+        "source": "REG_IDRiD_055_SE",
+        "target": "anatomy:MACULA",
+        "relation": "PROJECT_LOCATION",
+        "label": "项目推导位置",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行5",
+            "record_hash": "0260e81962a41b7e915bad247a625c9f3fc39ea291a5ef93e26888dc5e88317d",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+            "official_source": "OA-2:IDRiD_055_SE.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "b3bf4cad015d7dacc64bb01c",
+        "source": "REG_IDRiD_055_MA",
+        "target": "severity:SCATTERED",
+        "relation": "PROJECT_SEVERITY",
+        "label": "项目程度草案",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_lesion.csv",
+            "locator": "silver_lesion.csv:CSV行2",
+            "record_hash": "2339a53fd4a0ad79398413a961872a5bfb1825a528f3f3c259dd2329f24171fa",
+            "file_sha256": "54d9a5c3f842483adba83712c20093d8da53ea9e059998ee39542d6749352676",
+            "excerpt": "severity=SCATTERED; severity_source=DERIVED_AREA",
+            "official_source": "OA-2:IDRiD_055_MA.tif",
+            "transform": "官方病灶掩膜（lesion_type/area 与 region 同源；severity/location 为项目规则派生）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "b7edb6f6c7b08002a04cf5ab",
+        "source": "REG_IDRiD_055_HE",
+        "target": "anatomy:MACULA",
+        "relation": "PROJECT_LOCATION",
+        "label": "项目推导位置",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行3",
+            "record_hash": "929e557f6c8c385dfa2e67ac29ad95a7b17382647df4935a4a1fe8382c18afc8",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "location=MACULA; location_source=DERIVED_MASK",
+            "official_source": "OA-2:IDRiD_055_HE.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "c863067b94f564bab3104345",
+        "source": "REG_IDRiD_055_HE",
+        "target": "severity:MODERATE",
+        "relation": "PROJECT_SEVERITY",
+        "label": "项目程度草案",
+        "status": "REVIEW_REQUIRED",
+        "evidence": [
+          {
+            "document": "silver_lesion.csv",
+            "locator": "silver_lesion.csv:CSV行3",
+            "record_hash": "190f1b4e9741d0da5b17c450652cb11a8ee79d0bd751b606453612877b1037a8",
+            "file_sha256": "54d9a5c3f842483adba83712c20093d8da53ea9e059998ee39542d6749352676",
+            "excerpt": "severity=MODERATE; severity_source=DERIVED_AREA",
+            "official_source": "OA-2:IDRiD_055_HE.tif",
+            "transform": "官方病灶掩膜（lesion_type/area 与 region 同源；severity/location 为项目规则派生）",
+            "original_review_status": "PENDING",
+            "kind": "PROJECT_METADATA"
+          }
+        ]
+      },
+      {
+        "id": "ddf231ba121c93a6008c092a",
+        "source": "REG_IDRiD_055_MA",
+        "target": "lesion:MA",
+        "relation": "ANNOTATED_AS",
+        "label": "已有标注类型",
+        "status": "IMPORTED_PENDING",
+        "evidence": [
+          {
+            "document": "silver_region.csv",
+            "locator": "silver_region.csv:CSV行2",
+            "record_hash": "444da31409916935396cf7319a77c63e62d642c5582f27892cae82ea7c8a7366",
+            "file_sha256": "7794c31e6c8e3af84085e0df6475cd00f1c253af0f6807064c52ec166cfe29ce",
+            "excerpt": "lesion_type=MA",
+            "official_source": "OA-2:IDRiD_055_MA.tif",
+            "transform": "官方病灶掩膜 -> 连通域外接矩形/pixel_count/area_ratio（确定性像素运算）",
+            "original_review_status": "PENDING",
+            "kind": "MASK_DERIVED_METADATA"
+          }
+        ]
+      }
+    ]
+  },
+  "糖尿病视网膜病变": {
+    "status": "BASIC_SOURCE_RELATIONS",
+    "answer": "返回有公开来源的基础关系，未使用大模型生成答案，也不包含诊疗建议。",
+    "paths": [
+      {
+        "id": "0b99d21c5e5fd30aded0b5fa",
+        "source": "disease:DR",
+        "target": "lesion:HE",
+        "relation": "ASSOCIATED_LESION",
+        "label": "文献中的相关病灶",
+        "status": "SOURCE_BACKED_NOT_EXPERT_REVIEWED",
+        "evidence": [
+          {
+            "document": "IDRiD原始数据论文（2018）",
+            "locator": "Figure 1 / Figure 2 captions",
+            "url": "https://www.mdpi.com/2306-5729/3/3/25",
+            "excerpt": "人工概括：论文示例展示糖网病相关的微血管瘤、出血、硬性渗出和软性渗出/棉絮斑。",
+            "kind": "MANUALLY_CURATED_PUBLIC_SOURCE",
+            "original_review_status": "NO_LOCAL_CLINICAL_REVIEW",
+            "note": "只表示文献相关性；不能单凭其中一个病灶诊断糖网病"
+          }
+        ]
+      },
+      {
+        "id": "0bf11a9a14601376d341e165",
+        "source": "disease:DR",
+        "target": "lesion:EX",
+        "relation": "ASSOCIATED_LESION",
+        "label": "文献中的相关病灶",
+        "status": "SOURCE_BACKED_NOT_EXPERT_REVIEWED",
+        "evidence": [
+          {
+            "document": "IDRiD原始数据论文（2018）",
+            "locator": "Figure 1 / Figure 2 captions",
+            "url": "https://www.mdpi.com/2306-5729/3/3/25",
+            "excerpt": "人工概括：论文示例展示糖网病相关的微血管瘤、出血、硬性渗出和软性渗出/棉絮斑。",
+            "kind": "MANUALLY_CURATED_PUBLIC_SOURCE",
+            "original_review_status": "NO_LOCAL_CLINICAL_REVIEW",
+            "note": "只表示文献相关性；不能单凭其中一个病灶诊断糖网病"
+          }
+        ]
+      },
+      {
+        "id": "5c399a4a2769e5a9d57d7ccc",
+        "source": "disease:DR",
+        "target": "lesion:SE",
+        "relation": "ASSOCIATED_LESION",
+        "label": "文献中的相关病灶",
+        "status": "SOURCE_BACKED_NOT_EXPERT_REVIEWED",
+        "evidence": [
+          {
+            "document": "IDRiD原始数据论文（2018）",
+            "locator": "Figure 1 / Figure 2 captions",
+            "url": "https://www.mdpi.com/2306-5729/3/3/25",
+            "excerpt": "人工概括：论文示例展示糖网病相关的微血管瘤、出血、硬性渗出和软性渗出/棉絮斑。",
+            "kind": "MANUALLY_CURATED_PUBLIC_SOURCE",
+            "original_review_status": "NO_LOCAL_CLINICAL_REVIEW",
+            "note": "只表示文献相关性；不能单凭其中一个病灶诊断糖网病"
+          }
+        ]
+      },
+      {
+        "id": "9c52c0460ee9f22ba2ac4b69",
+        "source": "disease:DR",
+        "target": "lesion:MA",
+        "relation": "ASSOCIATED_LESION",
+        "label": "文献中的相关病灶",
+        "status": "SOURCE_BACKED_NOT_EXPERT_REVIEWED",
+        "evidence": [
+          {
+            "document": "IDRiD原始数据论文（2018）",
+            "locator": "Figure 1 / Figure 2 captions",
+            "url": "https://www.mdpi.com/2306-5729/3/3/25",
+            "excerpt": "人工概括：论文示例展示糖网病相关的微血管瘤、出血、硬性渗出和软性渗出/棉絮斑。",
+            "kind": "MANUALLY_CURATED_PUBLIC_SOURCE",
+            "original_review_status": "NO_LOCAL_CLINICAL_REVIEW",
+            "note": "只表示文献相关性；不能单凭其中一个病灶诊断糖网病"
+          }
+        ]
+      },
+      {
+        "id": "ca0c2bba3876b9ccad0fee23",
+        "source": "disease:DIABETES",
+        "target": "disease:DR",
+        "relation": "HAS_COMPLICATION",
+        "label": "可发生的并发症",
+        "status": "SOURCE_BACKED_NOT_EXPERT_REVIEWED",
+        "evidence": [
+          {
+            "document": "NEI患者教育手册（仅用于基本概念）",
+            "locator": "PDF第5页 / 正文第1页",
+            "url": "https://www.nei.nih.gov/sites/default/files/health-pdfs/diabeticretino.pdf",
+            "excerpt": "人工概括：糖尿病视网膜病变是糖尿病的并发症，涉及视网膜微小血管。",
+            "kind": "MANUALLY_CURATED_PUBLIC_SOURCE",
+            "original_review_status": "NO_LOCAL_CLINICAL_REVIEW",
+            "note": "历史科普资料；本样例不采入治疗与随访建议，不宣称最新诊疗标准"
+          }
+        ]
+      },
+      {
+        "id": "f3f662fab1011aaeb7efb7de",
+        "source": "disease:DR",
+        "target": "anatomy:RETINA",
+        "relation": "AFFECTS",
+        "label": "涉及部位",
+        "status": "SOURCE_BACKED_NOT_EXPERT_REVIEWED",
+        "evidence": [
+          {
+            "document": "NEI患者教育手册（仅用于基本概念）",
+            "locator": "PDF第5页 / 正文第1页",
+            "url": "https://www.nei.nih.gov/sites/default/files/health-pdfs/diabeticretino.pdf",
+            "excerpt": "人工概括：糖尿病视网膜病变是糖尿病的并发症，涉及视网膜微小血管。",
+            "kind": "MANUALLY_CURATED_PUBLIC_SOURCE",
+            "original_review_status": "NO_LOCAL_CLINICAL_REVIEW",
+            "note": "历史科普资料；本样例不采入治疗与随访建议，不宣称最新诊疗标准"
+          }
+        ]
+      }
+    ]
+  },
+  "未见出血参考病例": {
+    "status": "NEEDS_CLARIFICATION",
+    "answer": "此规则小样暂不处理多病灶、否定或疑似查询，请选择单一已确认病灶；没有把否定改成阳性。",
+    "paths": []
+  },
+  "糖网病怎么治疗": {
+    "status": "OUT_OF_SCOPE",
+    "answer": "该原型仅查询资料和基础关系，不提供诊断、治疗或用药结论。",
+    "paths": []
+  }
+}

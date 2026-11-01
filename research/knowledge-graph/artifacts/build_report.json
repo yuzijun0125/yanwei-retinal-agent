@@ -1,0 +1,26 @@
+{
+  "nodes": 824,
+  "edges": 2290,
+  "node_types": {
+    "CaseRecord": 81,
+    "ImageAsset": 81,
+    "Modality": 1,
+    "Laterality": 2,
+    "RegionAnnotation": 282,
+    "LesionConcept": 4,
+    "Anatomy": 4,
+    "SeverityDraft": 4,
+    "TextRecord": 363,
+    "Disease": 2
+  },
+  "edge_status": {
+    "IMPORTED_PENDING": 1089,
+    "REVIEW_REQUIRED": 631,
+    "MENTION_ONLY": 564,
+    "SOURCE_BACKED_NOT_EXPERT_REVIEWED": 6
+  },
+  "review_required": 631,
+  "medical_seed_facts": 6,
+  "llm_calls": 0,
+  "trained_mlp": false
+}

@@ -10,12 +10,13 @@ class VisitorTests(unittest.TestCase):
     def setUpClass(cls):
         cls.temp=tempfile.TemporaryDirectory()
         cls.dbpatch=patch.object(public,'DB',Path(cls.temp.name)/'visitors.sqlite');cls.dbpatch.start()
+        cls.statepatch=patch.object(public.gateway,'STATE',Path(cls.temp.name)/'review-state');cls.statepatch.start()
         cls.secret=patch.object(public.hosting,'settings',return_value={'api_key':'fixture-secret-not-a-real-key'});cls.secret.start()
         cls.server=public.PublicServer(('127.0.0.1',0),public.Handler)
         cls.thread=threading.Thread(target=cls.server.serve_forever,daemon=True);cls.thread.start()
     @classmethod
     def tearDownClass(cls):
-        cls.server.shutdown();cls.server.server_close();cls.dbpatch.stop();cls.secret.stop();cls.temp.cleanup()
+        cls.server.shutdown();cls.server.server_close();cls.dbpatch.stop();cls.statepatch.stop();cls.secret.stop();cls.temp.cleanup()
     def req(self,path,method='GET',body=None,cookie=None,origin=None):
         c=http.client.HTTPConnection('127.0.0.1',self.server.server_port,timeout=5)
         headers={'Content-Type':'application/json'}
@@ -92,5 +93,22 @@ class VisitorTests(unittest.TestCase):
         self.assertEqual(h.transform_packet(b'data: {"type":"execution_logs","content":"private"}'),b'')
     def test_non_object_body_is_controlled(self):
         self.assertEqual(self.req('/api/agent/run','POST',[])[0],400)
+
+    def test_review_routes_enforce_auth_and_server_snapshot(self):
+        import clinical_review
+        state=public.gateway.STATE;state.mkdir(parents=True,exist_ok=True)
+        clinical_review.provision(state)
+        code=json.loads((state/'reviewer.secret.json').read_text(encoding='utf-8'))['invitation_code']
+        first=self.visitor();second=self.visitor();sid=first.split('=')[1]
+        original={'trace_id':'trace-review-http','candidates':[{'source':{'case_id':'case-review-http'}}]}
+        clinical_review.remember(state,sid,original)
+        body={'trace_id':'trace-review-http','case_id':'case-review-http','request_key':'http1','verdict':'ACCEPT'}
+        self.assertEqual(self.req('/api/reviews','POST',body,first)[0],403)
+        self.assertEqual(self.req('/api/review/login','POST',{'code':code},first)[0],200)
+        self.assertEqual(self.req('/api/reviews','POST',body,first)[0],200)
+        self.assertEqual(self.req('/api/reviews',cookie=second)[0],403)
+        self.assertEqual(self.req('/api/review/login','POST',{'code':code},second)[0],200)
+        self.assertEqual(self.req('/api/reviews','POST',body,second)[0],400)
+        self.assertEqual(self.req('/api/review/activate','POST',{},first)[0],404)
 
 if __name__=='__main__':unittest.main()

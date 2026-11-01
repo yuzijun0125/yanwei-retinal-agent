@@ -1,0 +1,62 @@
+{
+  "HAS_IMAGE": {
+    "domain": "CaseRecord",
+    "range": "ImageAsset",
+    "label": "关联影像"
+  },
+  "HAS_REGION": {
+    "domain": "ImageAsset",
+    "range": "RegionAnnotation",
+    "label": "含参考标注区域"
+  },
+  "ANNOTATED_AS": {
+    "domain": "RegionAnnotation",
+    "range": "LesionConcept",
+    "label": "已有标注类型"
+  },
+  "PROJECT_LOCATION": {
+    "domain": "RegionAnnotation",
+    "range": "Anatomy",
+    "label": "项目推导位置"
+  },
+  "PROJECT_SEVERITY": {
+    "domain": "RegionAnnotation",
+    "range": "SeverityDraft",
+    "label": "项目程度草案"
+  },
+  "PROJECT_EYE": {
+    "domain": "ImageAsset",
+    "range": "Laterality",
+    "label": "项目推导眼别"
+  },
+  "MODALITY": {
+    "domain": "ImageAsset",
+    "range": "Modality",
+    "label": "影像模态"
+  },
+  "HAS_TEXT": {
+    "domain": "CaseRecord",
+    "range": "TextRecord",
+    "label": "关联文本记录"
+  },
+  "MENTIONS": {
+    "domain": "TextRecord",
+    "range": "LesionConcept",
+    "label": "文字提及（不代表肯定存在）"
+  },
+  "HAS_COMPLICATION": {
+    "domain": "Disease",
+    "range": "Disease",
+    "label": "可发生的并发症"
+  },
+  "AFFECTS": {
+    "domain": "Disease",
+    "range": "Anatomy",
+    "label": "涉及部位"
+  },
+  "ASSOCIATED_LESION": {
+    "domain": "Disease",
+    "range": "LesionConcept",
+    "label": "文献中的相关病灶"
+  }
+}

@@ -2,13 +2,21 @@
 
 **面向眼科教学与临床科研的多模态病例检索与证据复核原型。**
 
-最新团队开发版：2026-10-20。团队部署并配置一套眼维，用户通过专属网页导入病历截图、上传眼底图或输入描述。Nexent实际调用MCP完成处理，普通用户不需要配置模型或智能体。
+最新团队开发版：2026-11-01。团队部署并配置一套眼维，用户通过专属网页导入病历截图、上传眼底图或输入描述。Nexent实际调用MCP完成处理，普通用户不需要配置模型或智能体。
 
 当前提供可复现源码与部署配置，没有已上线的公网演示地址。研究原型尚无独立医学有效性验证，相似度不是疾病概率。
 
-![专属网页与候选病例](docs/images/hosted-console.png)
+![最新深色多模态工作台](docs/images/workspace-20261101.png)
 
 截图来自已有本机环境，已准备原图、模型、索引与Nexent授权；克隆仓库本身不会取得这些资源或授权。
+
+## 11月更新
+
+- 深色专属工作台：了解系统、病例检索、医生工作台；首页展示三种输入模态。
+- 医生复核：保存原始结果与修改意见，按病例、结论和关键词查询历史，支持分页和导出。
+- 图片上传：明确选择、预览和上传状态，提供拖放与粘贴入口。原生文件弹窗在用户浏览器的恢复情况仍待确认。
+- [知识图谱规则基线](research/knowledge-graph/README.md)：独立研究原型，尚未接入主系统。
+- [最新版本说明和组员上手步骤](docs/最新版本说明_20261101.md)。医生复核授权码在各部署环境本地生成，不随Git发布。
 
 ## 最新链路
 
@@ -72,7 +80,7 @@ cd 02_代码
 python -m unittest discover -s tests -p "test_*.py"
 python tests/run_golden.py
 cd ../integration
-python -m unittest test_integration test_public test_hosting
+python -m unittest test_integration test_public test_hosting test_clinical_review
 ```
 
 仓库新增GitHub Actions工程检查。CI及fixture测试不代表真实模型、Nexent外部服务或临床有效性通过；当前复测结果见[验证记录](docs/validation/README.md)。
@@ -82,7 +90,7 @@ python -m unittest test_integration test_public test_hosting
 - 已有：文字/图文召回、冲突追问、截图OCR核对、候选与证据、访客隔离及限流、团队统一授权。
 - 检索已包含基于排名的BM25/语义融合；RRF是公开方法，不是本项目原创。
 - 当前索引对应81张图；有待复核派生字段及合成/弱配对，查询标注DEMO_ONLY。
-- 尚未完整验收：半自动本体持续更新、跨文档多跳推理、可复用Skills与反馈更新闭环。
+- 尚未完整验收：半自动本体持续更新、跨文档多跳推理、可复用Skills与反馈驱动的自动训练与知识图谱更新闭环；当前已提供复核留痕及人工审核发布工具。
 - 暂不支持直接导入PDF/Word/Excel、多页合并；截图导入作为查询不等于拥有可持续检索的个人病例库。
 - 无正式用户账户、跨设备历史或自动文件清理；没有全新宿主机完整冷启动和临床准确性结论。
 

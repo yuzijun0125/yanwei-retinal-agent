@@ -76,7 +76,8 @@ class Handler(BaseHTTPRequestHandler):
     def file(self, path):
         raw = path.read_bytes()
         self.send_response(200)
-        self.send_header('Content-Type', 'text/html; charset=utf-8' if path.suffix == '.html' else 'application/javascript; charset=utf-8')
+        mime={'.html':'text/html','.css':'text/css','.js':'application/javascript'}.get(path.suffix,'application/octet-stream')
+        self.send_header('Content-Type', mime+'; charset=utf-8')
         self.send_header('Content-Length', str(len(raw)))
         self.send_header('Cache-Control', 'no-cache')
         self.end_headers()
