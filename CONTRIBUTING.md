@@ -9,19 +9,29 @@ git clone https://github.com/yuzijun0125/yanwei-retinal-agent.git
 cd yanwei-retinal-agent
 ```
 
-组长在GitHub仓库Settings → Collaborators中邀请两位组员。源码公开可读不自动授予写权限；本轮没有代发邀请，也不需要向队友分享账号密码。
+组长可以在 [Collaborators 设置](https://github.com/yuzijun0125/yanwei-retinal-agent/settings/access) 添加组员的 GitHub 用户名。组员接受邀请后，可向团队仓库推送任务分支。尚未获得写权限的组员也可以先 Fork 仓库，再从自己的 Fork 向团队仓库的 `main` 提交 PR。
 
-## 分支与交接
+## 每次改动怎么提交
 
-每个任务从更新后的main创建分支，分别负责数据评测、算法智能体、前端交付。示例：
+1. 提交或暂存已有的本地改动，再从最新 `main` 建立任务分支。下面以修改医生工作台为例。
 
-```bash
-git switch main
-git pull --ff-only
-git switch -c codex/retrieval-baseline
-```
+   ```bash
+   git switch main
+   git pull --ff-only
+   git switch -c frontend/review-workspace
+   ```
 
-数据使用`codex/data-eval-*`，前端使用`codex/frontend-*`；任务完成后提交PR，由另一人核对范围、结果和文档，再合并。不要force-push共享main。已经克隆旧版本的组员先提交或暂存自己的修改，再更新，不要直接丢弃本地工作。
+2. 改完后运行下方的相关检查。用 `git status --short` 查看变更，挑选本次任务的文件提交。
+
+   ```bash
+   git add -- 02_代码/web/workspace.js
+   git commit -m "Improve doctor review workspace"
+   git push -u origin frontend/review-workspace
+   ```
+
+3. 在 GitHub 打开 PR，目标选团队仓库的 `main`。填写改动和验证结果，请另一位组员审阅，待检查通过后合并。使用 Fork 时，`origin` 是自己的 Fork，发 PR 时选择团队仓库作为目标；后续可从 Fork 页面使用 **Sync fork** 同步更新。
+
+一个任务对应一个 PR。三位组员可以分别负责数据与评测、算法与智能体、前端与部署。修改共用接口或数据字段时，在 PR 里写清使用该接口的组员需要怎么调整。
 
 ## 资源与首次配置
 
@@ -39,9 +49,9 @@ cd 02_代码
 python -m unittest discover -s tests -p "test_*.py"
 python tests/run_golden.py
 cd ../integration
-python -m unittest test_integration test_public test_hosting
+python -m unittest test_integration test_public test_hosting test_clinical_review
 ```
 
 上述检查覆盖工程契约，部分使用fixture上游，不代表真实模型、完整Docker部署或医学准确性通过。涉及图文/Nexent修改时，再提供真实调用证据；没有依赖则标记未验证。
 
-PR说明至少写：具体问题、改动、执行命令与实际结果、未验证项。数据或模型变化必须记录版本和评测口径。暂不承诺正式开源许可；仓库作者代码和第三方条款见NOTICE.md。
+涉及图谱时，在 `research/knowledge-graph/` 运行 `python build_graph.py --source inputs` 和 `python -m unittest test_graph`。PR 模板会提示填写具体问题、改动、验证结果和未验证项。数据或模型变化必须记录版本和评测口径。暂不承诺正式开源许可；仓库作者代码和第三方条款见NOTICE.md。
